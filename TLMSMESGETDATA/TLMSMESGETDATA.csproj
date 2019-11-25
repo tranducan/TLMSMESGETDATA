@@ -43,6 +43,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -61,6 +62,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\MachineDisplay.cs" />
+    <Compile Include="PLC2\PLCData.cs" />
+    <Compile Include="SQLQuery\DBSQLServerUtils.cs" />
+    <Compile Include="SQLQuery\DBUtils.cs" />
+    <Compile Include="SQLQuery\sqlCON.cs" />
+    <Compile Include="SQLQuery\sqlERPCON.cs" />
+    <Compile Include="SQLQuery\SQLERPTarget.cs" />
+    <Compile Include="SQLQuery\sqlSFT.cs" />
+    <Compile Include="SQLQuery\valiballecommon.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

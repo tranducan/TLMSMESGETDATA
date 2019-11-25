@@ -52,7 +52,7 @@ namespace TLMSMESGETDATA.PLC2
 
         private Plc()
         {
-            Db1 = new DB1();
+          
             timer.Interval = 100; // ms
             timer.Elapsed += timer_Elapsed;
             timer.Enabled = true;

@@ -19,6 +19,8 @@ using PLCSimenNetWrapper;
 using TLMSMESGETDATA.PLC2;
 using System.Windows.Threading;
 using System.Globalization;
+using TLMSMESGETDATA.Model;
+using System.ComponentModel;
 
 namespace TLMSMESGETDATA
 {
@@ -32,7 +34,7 @@ namespace TLMSMESGETDATA
         EventBroker.EventParam m_timerEvent = null;
 
         FlowDocument m_flowDoc = null;
-
+        System.Threading.Timer tmrEnsureWorkerGetsCalled;
         List<Tag> tagsError;
         List<string> ListBarcode;
         List<string> ListError;
@@ -41,6 +43,26 @@ namespace TLMSMESGETDATA
         List<Tag> tagsRework;
         List<Tag> tags;
         DispatcherTimer timer = new DispatcherTimer();
+        List<MachineItem> ListMachines;
+        // this timer calls bgWorker again and again after regular intervals
+        System.Windows.Forms.Timer tmrCallBgWorker;
+        // this is our worker
+        BackgroundWorker bgWorker;
+        // this is our worker
+        BackgroundWorker bgSendMailWorker;
+        object lockObject = new object();
+        List<MachineOperation> machineOperations;
+        List<Plc> listPLC = new List<Plc>();
+        List<Tag> ListTagValueBasis;
+        List<Tag> ListTagNG;
+        List<Tag> ListTagRework;
+        string barcodeRuning = "";
+        string barcodeNew ="";
+        Stopwatch stopwatch;
+        int CountNGOld = 0 ; bool IsChangeCountNG = false;
+        int CountReworkOld = 0; bool IsChangeCountRW = false;
+
+
         public MainWindow()
         {
             InitializeComponent();
@@ -54,11 +76,165 @@ namespace TLMSMESGETDATA
             m_observerLog = new EventBroker.EventObserver(OnReceiveLog);
             EventBroker.AddObserver(EventBroker.EventID.etLog, m_observerLog);
             SystemLog.Output(SystemLog.MSG_TYPE.War, Title, "Started " );
-            timer.Interval = TimeSpan.FromMilliseconds(100);
-            timer.Tick += timer_Tick;
-            timer.IsEnabled = true;
-         
+            machineOperations = new List<MachineOperation>();
+            //timer.Interval = TimeSpan.FromMilliseconds(100);
+            //timer.Tick += timer_Tick;
+            //timer.IsEnabled = true;
+
+
+
         }
+        #region backgroundworker
+        private void LoadBackgroundWorker()
+        {   // this timer calls bgWorker again and again after regular intervals
+            tmrCallBgWorker = new System.Windows.Forms.Timer();//Timer for do task
+            tmrCallBgWorker.Tick += new EventHandler(tmrCallBgWorker_Tick);
+            tmrCallBgWorker.Interval = 100;
+
+            // this is our worker
+            bgWorker = new BackgroundWorker();
+
+            // work happens in this method
+            bgWorker.DoWork += new DoWorkEventHandler(bg_DoWork);
+            bgWorker.ProgressChanged += BgWorker_ProgressChanged;
+            bgWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bg_RunWorkerCompleted);
+            bgWorker.WorkerReportsProgress = true;
+
+        }
+        private void BgWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+
+
+
+        }
+
+        void bg_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+
+            datagridMachines.ItemsSource = machineOperations;
+            datagridMachines.Items.Refresh();
+          
+            lblReadTime.Text = "Circle-time: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
+            int CountOnline = machineOperations.Where(d => d.Status == ConnectionStates.Online.ToString()).Count();
+            int CountOffline = machineOperations.Where(d => d.Status == ConnectionStates.Offline.ToString()).Count();
+            lblConnectionState.Text = CountOnline.ToString() + " " + ConnectionStates.Online.ToString() + "|" +
+                CountOffline.ToString() + " " + ConnectionStates.Offline.ToString();
+        }
+
+        void bg_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // does a job like writing to serial communication, webservices etc
+            var worker = sender as BackgroundWorker;
+            stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+            if (ListMachines != null)
+            {
+                machineOperations = new List<MachineOperation>();
+                foreach (var machine in ListMachines)
+                {
+                    Plc.Instance.Connect(machine.IP);
+                    if (Plc.Instance.ConnectionState == ConnectionStates.Online)
+                    {
+                        var ListTag = Plc.Instance.ReadTags(tags);
+                        if (ListTag != null && ListTag.Count == 3)
+                        {
+                            MachineOperation ma1 = new MachineOperation();
+                            ma1.IP = machine.IP;
+                            ma1.Output = (ListTag[0].ItemValue.ToString() != null) ? double.Parse(ListTag[0].ItemValue.ToString()) : 0;
+                            ma1.NG = (ListTag[1].ItemValue.ToString() != null) ? double.Parse(ListTag[1].ItemValue.ToString()) : 0;
+                            ma1.Rework = (ListTag[2].ItemValue.ToString() != null) ? double.Parse(ListTag[2].ItemValue.ToString()) : 0;
+                            ma1.Status = Plc.Instance.ConnectionState.ToString();
+
+                            // Xac dinh co thay doi NG, RW ko ?
+                          if(CountNGOld < ma1.NG)
+                            {
+                               var  ListNG= Plc.Instance.ReadTags(tagsError);
+                           //     ListTagNG = ListNG.Where(d => (int)d.ItemValue > 0).ToList();
+                                CountNGOld =(int) ma1.NG;
+                            }
+                          if(CountReworkOld < ma1.Rework)
+                            {
+                               // var ListRW = 
+                               // ListTagRework = Plc.Instance.ReadTags(tagsRework);
+                                CountReworkOld = (int)ma1.Rework;
+                            }
+                            if (ma1.Output + ma1.NG + ma1.Rework == 0 || barcodeRuning == "")
+                                barcodeRuning = Plc.Instance.ReadTagsToString(tagsbarcode);
+                            if (barcodeRuning != null || barcodeRuning != ""  /*&& barcodeRuning.Length == 24*/)
+                                ma1.Lot = barcodeRuning;
+                            else
+                            {
+                                ma1.Lot = "";
+                            }
+                            machineOperations.Add(ma1);
+                            ma1 = null;
+                        }
+                    }
+                    else if(Plc.Instance.ConnectionState == ConnectionStates.Offline)
+                    {
+                        MachineOperation ma1 = new MachineOperation();
+                        ma1.IP = machine.IP;
+                        ma1.Status = Plc.Instance.ConnectionState.ToString();
+
+                        machineOperations.Add(ma1);
+                        ma1 = null;
+                    }
+                }
+                stopwatch.Stop();
+
+                //     barcodeRuning = Plc.Instance.ReadTagsToString(tagsbarcode);
+
+                Plc.Instance.Disconnect();
+                    
+                }
+            
+
+            System.Threading.Thread.Sleep(100);
+        }
+        void tmrCallBgWorker_Tick(object sender, EventArgs e)
+        {
+            if (Monitor.TryEnter(lockObject))
+            {
+                try
+                {
+                    // if bgworker is not busy the call the worker
+                    if (!bgWorker.IsBusy)
+                        bgWorker.RunWorkerAsync();
+                }
+                finally
+                {
+                    Monitor.Exit(lockObject);
+                }
+
+            }
+            else
+            {
+
+                // as the bgworker is busy we will start a timer that will try to call the bgworker again after some time
+                tmrEnsureWorkerGetsCalled = new System.Threading.Timer(new TimerCallback(tmrEnsureWorkerGetsCalled_Callback), null, 0, 10);
+
+            }
+
+        }
+        void tmrEnsureWorkerGetsCalled_Callback(object obj)
+        {
+            // this timer was started as the bgworker was busy before now it will try to call the bgworker again
+            if (Monitor.TryEnter(lockObject))
+            {
+                try
+                {
+                    if (!bgWorker.IsBusy)
+                        bgWorker.RunWorkerAsync();
+                }
+                finally
+                {
+                    Monitor.Exit(lockObject);
+                }
+                tmrEnsureWorkerGetsCalled = null;
+            }
+        }
+        #endregion
         void timer_Tick(object sender, EventArgs e)
         {
             btn_connect.IsEnabled = Plc.Instance.ConnectionState == ConnectionStates.Offline;
@@ -82,6 +258,9 @@ namespace TLMSMESGETDATA
         }
         public void LoadAdress()
         {
+            ListMachines = new List<MachineItem>();
+            PLCData pLCData = new PLCData();
+            ListMachines = pLCData.GetIpMachineRuning();
             ListBarcode = VariablePLC.barcodeaddress();
 
             tagsbarcode = new List<Tag>();
@@ -120,6 +299,7 @@ namespace TLMSMESGETDATA
                 EventBroker.AddTimeEvent(EventBroker.EventID.etUpdateMe, m_timerEvent, 3960000, true);//66분에 한번씩
                 //EventBroker.AddTimeEvent(EventBroker.EventID.etUpdateMe, m_timerEvent, 20000, true);//66분에 한번씩
             }
+            LoadBackgroundWorker();
             LoadAdress();
         }
         protected override void OnStateChanged(EventArgs e)
@@ -191,7 +371,12 @@ namespace TLMSMESGETDATA
         {
             try
             {
-                Plc.Instance.Connect("172.16.1.64");
+                tmrCallBgWorker.Start();
+                btn_connect.Content = "Starting";
+                btn_disconnect.Content = "Stop";
+                btn_connect.IsEnabled = false;
+                btn_disconnect.IsEnabled = true;
+                //   Plc.Instance.Connect("172.16.1.64");
 
             }
             catch (Exception exc)
@@ -205,7 +390,12 @@ namespace TLMSMESGETDATA
         {
             try
             {
-                Plc.Instance.Disconnect();
+                tmrCallBgWorker.Stop();
+                btn_disconnect.Content = "Stopping";
+                btn_connect.Content = "Start";
+                btn_connect.IsEnabled = true;
+                btn_disconnect.IsEnabled = false;
+
             }
             catch (Exception exc)
             {
@@ -218,18 +408,18 @@ namespace TLMSMESGETDATA
             Stopwatch stopwatch = new Stopwatch();
 
             stopwatch.Start();
+            Plc.Instance.Connect("172.16.1.64");
             try
             {
                 var ListTag = Plc.Instance.ReadTags(tags);
                 if (ListTag != null)
                 {
-                    lb_output.Content = ListTag[0].ItemValue;
-                    lb_NG.Content = ListTag[1].ItemValue;
+                  
                 }
                 var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
                 if (barcode != null)
                 {
-                    lb_barcode.Content = barcode;
+                   
                 }
 
 
@@ -253,8 +443,8 @@ namespace TLMSMESGETDATA
                 var ListTag = Plc.Instance.ReadTags(tags);
                 if (ListTag != null)
                 {
-                    lb_output.Content = ListTag[0].ItemValue;
-                    lb_NG.Content = ListTag[1].ItemValue;
+                
+                  
                 }
 
             }

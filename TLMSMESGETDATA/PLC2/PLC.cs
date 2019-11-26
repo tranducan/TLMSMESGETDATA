@@ -89,21 +89,41 @@ namespace TLMSMESGETDATA.PLC2
 
         public void Connect(string ipAddress)
         {
+            try
+            {
+
+          
             if (!IsValidIp(ipAddress))
             {
                 throw new ArgumentException("Ip address is not valid");
             }
             plcDriver = new S7NetPlcDriver(CpuType.S71200, ipAddress, 0, 1);
             plcDriver.Connect();
+            }
+            catch (Exception ex) 
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "Connect(string ipAddress) " + ipAddress, ex.Message);
+            }
         }
 
         public void Disconnect()
         {
+            try
+            {
+
+           
             if (plcDriver == null || this.ConnectionState == ConnectionStates.Offline)
             {
                 return;
             }
             plcDriver.Disconnect();
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "Connect(string ipAddress) " , ex.Message);
+            }
         }
 
         public void Write(string name, object value)
@@ -130,6 +150,9 @@ namespace TLMSMESGETDATA.PLC2
         }
         public List<Tag> ReadTags(List<Tag> tagsinput)
         {
+            List<Tag> tags = plcDriver.ReadItems(tagsinput);
+            try
+            {
 
 
             if (plcDriver == null || plcDriver.ConnectionState != ConnectionStates.Online)
@@ -137,13 +160,23 @@ namespace TLMSMESGETDATA.PLC2
                 return null;
             }
 
-            List<Tag> tags = plcDriver.ReadItems(tagsinput);
+           
+
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "ReadTags(List<Tag> tagsinput)", ex.Message);
+            }
             return tags;
 
         }
         public string ReadTagsToString(List<Tag> tagsinput)
         {
             string barcode = "";
+            try
+            {
+         
             if (plcDriver == null || plcDriver.ConnectionState != ConnectionStates.Online)
             {
                 return null;
@@ -153,6 +186,12 @@ namespace TLMSMESGETDATA.PLC2
             {
                 char c = Convert.ToChar(int.Parse(item.ItemValue.ToString()));
                 barcode += c;
+            }
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "ReadTagsToString(List<Tag> tagsinput))", ex.Message);
             }
             return barcode;
         }
@@ -179,7 +218,18 @@ namespace TLMSMESGETDATA.PLC2
 
         private void RefreshTags()
         {
+            try
+            {
+
+          
             plcDriver.ReadClass(Db1, 2);
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "RefreshTags()",ex.Message );
+
+            }
 
         }
 

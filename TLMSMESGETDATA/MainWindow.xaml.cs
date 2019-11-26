@@ -52,6 +52,7 @@ namespace TLMSMESGETDATA
         BackgroundWorker bgSendMailWorker;
         object lockObject = new object();
         List<MachineOperation> machineOperations;
+        List<MachineOperation> machineOperationsOld;
         List<Plc> listPLC = new List<Plc>();
         List<Tag> ListTagValueBasis;
         List<Tag> ListTagNG;
@@ -77,6 +78,7 @@ namespace TLMSMESGETDATA
             EventBroker.AddObserver(EventBroker.EventID.etLog, m_observerLog);
             SystemLog.Output(SystemLog.MSG_TYPE.War, Title, "Started " );
             machineOperations = new List<MachineOperation>();
+            machineOperationsOld = new List<MachineOperation>();
             //timer.Interval = TimeSpan.FromMilliseconds(100);
             //timer.Tick += timer_Tick;
             //timer.IsEnabled = true;
@@ -111,12 +113,12 @@ namespace TLMSMESGETDATA
         void bg_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
 
-            datagridMachines.ItemsSource = machineOperations;
+            datagridMachines.ItemsSource = machineOperationsOld;
             datagridMachines.Items.Refresh();
           
             lblReadTime.Text = "Circle-time: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
-            int CountOnline = machineOperations.Where(d => d.Status == ConnectionStates.Online.ToString()).Count();
-            int CountOffline = machineOperations.Where(d => d.Status == ConnectionStates.Offline.ToString()).Count();
+            int CountOnline = machineOperationsOld.Where(d => d.Status == ConnectionStates.Online.ToString()).Count();
+            int CountOffline = machineOperationsOld.Where(d => d.Status == ConnectionStates.Offline.ToString()).Count();
             lblConnectionState.Text = CountOnline.ToString() + " " + ConnectionStates.Online.ToString() + "|" +
                 CountOffline.ToString() + " " + ConnectionStates.Offline.ToString();
         }
@@ -126,68 +128,95 @@ namespace TLMSMESGETDATA
             // does a job like writing to serial communication, webservices etc
             var worker = sender as BackgroundWorker;
             stopwatch = new Stopwatch();
-
-            stopwatch.Start();
-            if (ListMachines != null)
+            try
             {
-                machineOperations = new List<MachineOperation>();
-                foreach (var machine in ListMachines)
+
+
+                stopwatch.Start();
+                if (ListMachines != null)
                 {
-                    Plc.Instance.Connect(machine.IP);
-                    if (Plc.Instance.ConnectionState == ConnectionStates.Online)
+                    machineOperations = new List<MachineOperation>();
+                    foreach (var machine in ListMachines)
                     {
-                        var ListTag = Plc.Instance.ReadTags(tags);
-                        if (ListTag != null && ListTag.Count == 3)
+                        Plc.Instance.Connect(machine.IP);
+                        if (Plc.Instance.ConnectionState == ConnectionStates.Online)
+                        {
+                            var ListTag = Plc.Instance.ReadTags(tags);
+                            if (ListTag != null && ListTag.Count == 3)
+                            {
+                                MachineOperation ma1 = new MachineOperation();
+                                ma1.IP = machine.IP;
+                                ma1.Output = (ListTag[0].ItemValue.ToString() != null) ? double.Parse(ListTag[0].ItemValue.ToString()) : 0;
+                                ma1.NG = (ListTag[1].ItemValue.ToString() != null) ? double.Parse(ListTag[1].ItemValue.ToString()) : 0;
+                                ma1.Rework = (ListTag[2].ItemValue.ToString() != null) ? double.Parse(ListTag[2].ItemValue.ToString()) : 0;
+                                ma1.Status = Plc.Instance.ConnectionState.ToString();
+
+                                // Xac dinh co thay doi NG, RW ko ?
+                                if (CountNGOld < ma1.NG)
+                                {
+                                    var ListNG = Plc.Instance.ReadTags(tagsError);
+                                    //     ListTagNG = ListNG.Where(d => (int)d.ItemValue > 0).ToList();
+                                    CountNGOld = (int)ma1.NG;
+                                }
+                                if (CountReworkOld < ma1.Rework)
+                                {
+                                    // var ListRW = 
+                                    // ListTagRework = Plc.Instance.ReadTags(tagsRework);
+                                    CountReworkOld = (int)ma1.Rework;
+                                }
+                                if (machineOperationsOld.Count > 0)
+                                {
+                                    var machinex = machineOperationsOld.Where(d => d.IP == ma1.IP).ToList();
+                                    if (machinex != null && machinex.Count == 0 && machinex[0].Lot == "")
+                                        ma1.Lot = Plc.Instance.ReadTagsToString(tagsbarcode);
+                                    else
+                                    {
+                                        ma1.Lot = machinex[0].Lot;
+                                    }
+                                    if (machinex != null && machinex.Count > 0 && machinex[0].NG != 0 && machinex[0].NG < ma1.NG)
+                                    {
+                                        var ListNG = Plc.Instance.ReadTags(tagsError);
+                                    }
+
+
+
+                                    if (machinex != null && machinex.Count > 0 && machinex[0].Rework != 0 && machinex[0].Rework < ma1.Rework)
+                                    {
+                                        var ListRW = Plc.Instance.ReadTags(tagsRework);
+                                    }
+
+                                }
+                                else ma1.Lot = Plc.Instance.ReadTagsToString(tagsbarcode);
+
+                                machineOperations.Add(ma1);
+                                ma1 = null;
+                            }
+                        }
+                        else if (Plc.Instance.ConnectionState == ConnectionStates.Offline)
                         {
                             MachineOperation ma1 = new MachineOperation();
                             ma1.IP = machine.IP;
-                            ma1.Output = (ListTag[0].ItemValue.ToString() != null) ? double.Parse(ListTag[0].ItemValue.ToString()) : 0;
-                            ma1.NG = (ListTag[1].ItemValue.ToString() != null) ? double.Parse(ListTag[1].ItemValue.ToString()) : 0;
-                            ma1.Rework = (ListTag[2].ItemValue.ToString() != null) ? double.Parse(ListTag[2].ItemValue.ToString()) : 0;
                             ma1.Status = Plc.Instance.ConnectionState.ToString();
 
-                            // Xac dinh co thay doi NG, RW ko ?
-                          if(CountNGOld < ma1.NG)
-                            {
-                               var  ListNG= Plc.Instance.ReadTags(tagsError);
-                           //     ListTagNG = ListNG.Where(d => (int)d.ItemValue > 0).ToList();
-                                CountNGOld =(int) ma1.NG;
-                            }
-                          if(CountReworkOld < ma1.Rework)
-                            {
-                               // var ListRW = 
-                               // ListTagRework = Plc.Instance.ReadTags(tagsRework);
-                                CountReworkOld = (int)ma1.Rework;
-                            }
-                            if (ma1.Output + ma1.NG + ma1.Rework == 0 || barcodeRuning == "")
-                                barcodeRuning = Plc.Instance.ReadTagsToString(tagsbarcode);
-                            if (barcodeRuning != null || barcodeRuning != ""  /*&& barcodeRuning.Length == 24*/)
-                                ma1.Lot = barcodeRuning;
-                            else
-                            {
-                                ma1.Lot = "";
-                            }
                             machineOperations.Add(ma1);
                             ma1 = null;
                         }
                     }
-                    else if(Plc.Instance.ConnectionState == ConnectionStates.Offline)
-                    {
-                        MachineOperation ma1 = new MachineOperation();
-                        ma1.IP = machine.IP;
-                        ma1.Status = Plc.Instance.ConnectionState.ToString();
+                    machineOperationsOld = machineOperations;
+                    machineOperations = null;
+                    stopwatch.Stop();
 
-                        machineOperations.Add(ma1);
-                        ma1 = null;
-                    }
+                    //     barcodeRuning = Plc.Instance.ReadTagsToString(tagsbarcode);
+
+                    Plc.Instance.Disconnect();
                 }
-                stopwatch.Stop();
+            }
+            catch (Exception ex)
+            {
 
-                //     barcodeRuning = Plc.Instance.ReadTagsToString(tagsbarcode);
-
-                Plc.Instance.Disconnect();
-                    
-                }
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "Read PLC fail", ex.Message);
+            }
+        
             
 
             System.Threading.Thread.Sleep(100);

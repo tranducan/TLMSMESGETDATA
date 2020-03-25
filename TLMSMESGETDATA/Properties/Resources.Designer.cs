@@ -79,5 +79,15 @@ namespace TLMSMESGETDATA.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Proycontec_Robots_Robot_screen_settings {
+            get {
+                object obj = ResourceManager.GetObject("Proycontec_Robots_Robot_screen_settings", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
     }
 }

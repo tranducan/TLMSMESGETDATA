@@ -104,7 +104,7 @@ namespace PLCSimenNetWrapper
                 catch (Exception)
                 {
 
-                    
+                    ;
                 }
               
             }

@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data;
-using System.Data.SqlClient;
 using System.Windows.Forms;
-
 
 namespace TLMSMESGETDATA
 {
-    public class sqlCON
+  public  class SQLERPTarget
     {
-        public SqlConnection conn = DBUtils.GetDBConnection(); //get from user database
-
+        public SqlConnection conn = DBUtils.GetERPTargetBConnection(); //get from user database
         public string sqlExecuteScalarString(string sql)
         {
-          
+
             String outstring;
             try
             {
@@ -28,8 +26,8 @@ namespace TLMSMESGETDATA
             }
             catch (Exception ex)
             {
-
-                MessageBox.Show(ex.Message, "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "Database Responce", ex.Message);
+              //  MessageBox.Show(ex.Message, "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return String.Empty;
             }
 
@@ -56,7 +54,8 @@ namespace TLMSMESGETDATA
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "Database Responce", ex.Message);
+              //  MessageBox.Show(ex.Message, "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
             }
             conn.Close();
@@ -76,8 +75,9 @@ namespace TLMSMESGETDATA
             }
             catch (Exception ex)
             {
-                //  MessageBox.Show(ex.Message, "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                SystemLog.Output(SystemLog.MSG_TYPE.Err, "sqlDataAdapterFillDatatable", ex.Message);
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "Database Responce", ex.Message);
+               // MessageBox.Show(ex.Message, "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
             }
         }
         public bool sqlExecuteNonQuery(string sql, bool result_message_show)
@@ -96,15 +96,17 @@ namespace TLMSMESGETDATA
                 }
                 else
                 {
-                    MessageBox.Show("Not successful!", "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    SystemLog.Output(SystemLog.MSG_TYPE.Err, "Database Responce","");
+                 //   MessageBox.Show("Not successful!", "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     conn.Close();
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Not successful!" + System.Environment.NewLine + ex.Message
-                                , "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "Database Responce", ex.Message);
+                //MessageBox.Show("Not successful!" + System.Environment.NewLine + ex.Message
+                //                , "Database Responce", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 conn.Close();
                 return false;
             }

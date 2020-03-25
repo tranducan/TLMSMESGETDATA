@@ -66,15 +66,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Algorithm\Uploaddata.cs" />
     <Compile Include="Model\MachineDisplay.cs" />
     <Compile Include="PLC2\PLCData.cs" />
-    <Compile Include="SQLQuery\DBSQLServerUtils.cs" />
-    <Compile Include="SQLQuery\DBUtils.cs" />
-    <Compile Include="SQLQuery\sqlCON.cs" />
-    <Compile Include="SQLQuery\sqlERPCON.cs" />
-    <Compile Include="SQLQuery\SQLERPTarget.cs" />
-    <Compile Include="SQLQuery\sqlSFT.cs" />
-    <Compile Include="SQLQuery\valiballecommon.cs" />
+    <Compile Include="SQLUpload\DBSQLServerUtils.cs" />
+    <Compile Include="SQLUpload\DBUtils.cs" />
+    <Compile Include="SQLUpload\ExportListProduct.cs" />
+    <Compile Include="SQLUpload\sqlCON.cs" />
+    <Compile Include="SQLUpload\sqlERPCON.cs" />
+    <Compile Include="SQLUpload\SQLERPTarget.cs" />
+    <Compile Include="SQLUpload\sqlSFT.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -131,6 +132,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Machine.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Proycontec-Robots-Robot-screen-settings.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

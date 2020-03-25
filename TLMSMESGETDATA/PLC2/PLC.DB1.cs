@@ -6,18 +6,21 @@ using System.Threading.Tasks;
 
 namespace TLMSMESGETDATA.PLC2
 {
-    class DB1
+    class DataMQC
     {
-        public string Good_Products_Total { get; set; }
-        public string NG_Products_Total { get; set; }
+        public double Good_Products_Total { get; set; }
+        public double NG_Products_Total { get; set; }
 
-        public string[] NG_Products_NG_ = new string[38];
+        public int[] NG_Products_NG_ = new int[38];
 
         //4
-        public string RW_Products_Total { get; set; }
-        public string[] RW_Products_NG_ = new string[38];
+        public double RW_Products_Total { get; set; }
+        public int[] RW_Products_NG_ = new int[38];
 
         //8
         public string PLC_Barcode { get; set; }
+        public string STARTSTOP { get; set; }
+        public DateTime DateTimeReset { get; set; }
     }
+    
 }

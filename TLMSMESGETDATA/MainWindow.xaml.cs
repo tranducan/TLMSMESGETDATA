@@ -21,12 +21,23 @@ using System.Windows.Threading;
 using System.Globalization;
 using TLMSMESGETDATA.Model;
 using System.ComponentModel;
+using TLMSMESGETDATA.Algorithm;
+using TLMSMESGETDATA.SQLUpload;
 
 namespace TLMSMESGETDATA
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    /// 
+    public enum PLCStatusOperation
+    {
+        Staring, Stoped, Reset, FinishedLot
+    }
+    public enum PLCStatus
+    {
+        Online, Offline
+    }
     public partial class MainWindow : Window
     {
         EventBroker.EventObserver m_observerLog = null;
@@ -49,20 +60,18 @@ namespace TLMSMESGETDATA
         // this is our worker
         BackgroundWorker bgWorker;
         // this is our worker
-        BackgroundWorker bgSendMailWorker;
+      
         object lockObject = new object();
         List<MachineOperation> machineOperations;
         List<MachineOperation> machineOperationsOld;
-        List<Plc> listPLC = new List<Plc>();
-        List<Tag> ListTagValueBasis;
-        List<Tag> ListTagNG;
-        List<Tag> ListTagRework;
-        string barcodeRuning = "";
-        string barcodeNew ="";
+        List<Tag> ListTagWrite;
         Stopwatch stopwatch;
-        int CountNGOld = 0 ; bool IsChangeCountNG = false;
-        int CountReworkOld = 0; bool IsChangeCountRW = false;
 
+        Dictionary<string, DataMQC> keyValuePairsOld = new Dictionary<string, DataMQC>();
+        Dictionary<string, DataMQC> keyValuePairsNew = new Dictionary<string, DataMQC>();
+        int CountRun = 0;
+        System.Windows.Forms.NotifyIcon m_notify = null;
+        int CountRefresh = 0;
 
         public MainWindow()
         {
@@ -83,15 +92,13 @@ namespace TLMSMESGETDATA
             //timer.Tick += timer_Tick;
             //timer.IsEnabled = true;
 
-
-
         }
         #region backgroundworker
         private void LoadBackgroundWorker()
         {   // this timer calls bgWorker again and again after regular intervals
             tmrCallBgWorker = new System.Windows.Forms.Timer();//Timer for do task
             tmrCallBgWorker.Tick += new EventHandler(tmrCallBgWorker_Tick);
-            tmrCallBgWorker.Interval = 100;
+            tmrCallBgWorker.Interval = 500;
 
             // this is our worker
             bgWorker = new BackgroundWorker();
@@ -112,15 +119,31 @@ namespace TLMSMESGETDATA
 
         void bg_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            try
+            {
+                CountRefresh++;
 
-            datagridMachines.ItemsSource = machineOperationsOld;
-            datagridMachines.Items.Refresh();
-          
-            lblReadTime.Text = "Circle-time: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
-            int CountOnline = machineOperationsOld.Where(d => d.Status == ConnectionStates.Online.ToString()).Count();
-            int CountOffline = machineOperationsOld.Where(d => d.Status == ConnectionStates.Offline.ToString()).Count();
-            lblConnectionState.Text = CountOnline.ToString() + " " + ConnectionStates.Online.ToString() + "|" +
-                CountOffline.ToString() + " " + ConnectionStates.Offline.ToString();
+                datagridMachines.ItemsSource = machineOperations;
+                datagridMachines.Items.Refresh();
+
+                lblReadTime.Text = "Circle-time: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
+                int CountOnline = machineOperations.Where(d => d.Status == ConnectionStates.Online.ToString()).Count();
+                int CountOffline = machineOperations.Where(d => d.Status == ConnectionStates.Offline.ToString()).Count();
+                lblConnectionState.Text = CountOnline.ToString() + " " + ConnectionStates.Online.ToString() + "|" +
+                    CountOffline.ToString() + " " + ConnectionStates.Offline.ToString();
+                if (CountRefresh == 60)
+                {
+                    ExportListProduct.exportcsvToPLC();
+                    CountRefresh = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "update UI error", ex.Message);
+            }
+       
+            
         }
 
         void bg_DoWork(object sender, DoWorkEventArgs e)
@@ -131,85 +154,66 @@ namespace TLMSMESGETDATA
             try
             {
 
-
                 stopwatch.Start();
                 if (ListMachines != null)
                 {
-                    machineOperations = new List<MachineOperation>();
+                  machineOperations = new List<MachineOperation>();
                     foreach (var machine in ListMachines)
                     {
-                        Plc.Instance.Connect(machine.IP);
-                        if (Plc.Instance.ConnectionState == ConnectionStates.Online)
+                        DataMQC MQCIPOld = keyValuePairsOld[machine.IP];
+                        DataMQC mQCIP = new DataMQC();
+                        mQCIP =  GetDataMQCRealtime(machine.IP, machine.Line, MQCIPOld);
+                         if(mQCIP != null)
                         {
-                            var ListTag = Plc.Instance.ReadTags(tags);
-                            if (ListTag != null && ListTag.Count == 3)
-                            {
-                                MachineOperation ma1 = new MachineOperation();
-                                ma1.IP = machine.IP;
-                                ma1.Output = (ListTag[0].ItemValue.ToString() != null) ? double.Parse(ListTag[0].ItemValue.ToString()) : 0;
-                                ma1.NG = (ListTag[1].ItemValue.ToString() != null) ? double.Parse(ListTag[1].ItemValue.ToString()) : 0;
-                                ma1.Rework = (ListTag[2].ItemValue.ToString() != null) ? double.Parse(ListTag[2].ItemValue.ToString()) : 0;
-                                ma1.Status = Plc.Instance.ConnectionState.ToString();
+                            Uploaddata uploaddata = new Uploaddata();
+                          
+                            bool ischange = false;
+                            DataMQC mQCIPChanged = new DataMQC();
+                            mQCIPChanged  =  uploaddata.ChangeMQCData(MQCIPOld, mQCIP, out ischange);
+                            keyValuePairsOld[machine.IP] = mQCIP;
 
-                                // Xac dinh co thay doi NG, RW ko ?
-                                if (CountNGOld < ma1.NG)
+                            if (mQCIP.PLC_Barcode.Contains("0010;B01;B01"))
+                            {
+                                if (ischange )
                                 {
-                                    var ListNG = Plc.Instance.ReadTags(tagsError);
-                                    //     ListTagNG = ListNG.Where(d => (int)d.ItemValue > 0).ToList();
-                                    CountNGOld = (int)ma1.NG;
+
+                                    var InsertDb = uploaddata.InsertMQCUpdateRealtime(mQCIPChanged, machine.Line, false);
+                                   
                                 }
-                                if (CountReworkOld < ma1.Rework)
-                                {
-                                    // var ListRW = 
-                                    // ListTagRework = Plc.Instance.ReadTags(tagsRework);
-                                    CountReworkOld = (int)ma1.Rework;
-                                }
-                                if (machineOperationsOld.Count > 0)
-                                {
-                                    var machinex = machineOperationsOld.Where(d => d.IP == ma1.IP).ToList();
-                                    if (machinex != null && machinex.Count == 0 && machinex[0].Lot == "")
-                                        ma1.Lot = Plc.Instance.ReadTagsToString(tagsbarcode);
+
+                         var StockAvaiable = uploaddata.QuantityCanRun(mQCIPChanged.PLC_Barcode);
+                                    if (StockAvaiable > 0)
+                                    {
+
+
+                                        Plc.Instance.Write("DB151.DBW0", (uint)StockAvaiable);
+
+                                    }
                                     else
                                     {
-                                        ma1.Lot = machinex[0].Lot;
+
+
+                                        Plc.Instance.Write("DB151.DBW4", (uint)Math.Abs(StockAvaiable));
+
+
                                     }
-                                    if (machinex != null && machinex.Count > 0 && machinex[0].NG != 0 && machinex[0].NG < ma1.NG)
-                                    {
-                                        var ListNG = Plc.Instance.ReadTags(tagsError);
-                                    }
-
-
-
-                                    if (machinex != null && machinex.Count > 0 && machinex[0].Rework != 0 && machinex[0].Rework < ma1.Rework)
-                                    {
-                                        var ListRW = Plc.Instance.ReadTags(tagsRework);
-                                    }
-
-                                }
-                                else ma1.Lot = Plc.Instance.ReadTagsToString(tagsbarcode);
-
-                                machineOperations.Add(ma1);
-                                ma1 = null;
+                                
+                            }
+                            else
+                            {
+                                SystemLog.Output(SystemLog.MSG_TYPE.War, "Line : " + machine.Line, "Barcode Wrong Format "+ mQCIP.PLC_Barcode);
                             }
                         }
-                        else if (Plc.Instance.ConnectionState == ConnectionStates.Offline)
+                         else
                         {
-                            MachineOperation ma1 = new MachineOperation();
-                            ma1.IP = machine.IP;
-                            ma1.Status = Plc.Instance.ConnectionState.ToString();
-
-                            machineOperations.Add(ma1);
-                            ma1 = null;
+                            SystemLog.Output(SystemLog.MSG_TYPE.War, "Line : " + machine.Line, " DATA MQC = NULL ");
                         }
+                        }
+
                     }
-                    machineOperationsOld = machineOperations;
-                    machineOperations = null;
-                    stopwatch.Stop();
-
-                    //     barcodeRuning = Plc.Instance.ReadTagsToString(tagsbarcode);
-
-                    Plc.Instance.Disconnect();
-                }
+                
+              
+                stopwatch.Stop();
             }
             catch (Exception ex)
             {
@@ -217,8 +221,6 @@ namespace TLMSMESGETDATA
                 SystemLog.Output(SystemLog.MSG_TYPE.Err, "Read PLC fail", ex.Message);
             }
         
-            
-
             System.Threading.Thread.Sleep(100);
         }
         void tmrCallBgWorker_Tick(object sender, EventArgs e)
@@ -281,7 +283,7 @@ namespace TLMSMESGETDATA
             }
             btn_disconnect.IsEnabled = Plc.Instance.ConnectionState != ConnectionStates.Offline;
             lblConnectionState.Text = Plc.Instance.ConnectionState.ToString();
-            LoadDataRealTime();
+     
             // statusbar
             lblReadTime.Text = Plc.Instance.CycleReadTime.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
         }
@@ -293,6 +295,11 @@ namespace TLMSMESGETDATA
             ListBarcode = VariablePLC.barcodeaddress();
 
             tagsbarcode = new List<Tag>();
+            ListTagWrite = new List<Tag>();
+            Tag tag = new Tag(VariablePLC.AddingAvaiable, "");
+            ListTagWrite.Add(tag);
+            tag = new Tag(VariablePLC.GapQty, "");
+            ListTagWrite.Add(tag);
             foreach (var item in ListBarcode)
             {
                 tagsbarcode.Add(new Tag(item, ""));
@@ -313,11 +320,13 @@ namespace TLMSMESGETDATA
             }
             tags = new List<Tag>();
 
-            Tag tag = new Tag(VariablePLC.Good_Products_Total, "");
+             tag = new Tag(VariablePLC.Good_Products_Total, "");
             tags.Add(tag);
             tag = new Tag(VariablePLC.NG_Products_Total, "");
             tags.Add(tag);
             tag = new Tag(VariablePLC.RW_Products_Total, "");
+            tags.Add(tag);
+            tag = new Tag(VariablePLC.OnOFF, "");
             tags.Add(tag);
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -330,6 +339,41 @@ namespace TLMSMESGETDATA
             }
             LoadBackgroundWorker();
             LoadAdress();
+            System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu();
+
+            System.Windows.Forms.MenuItem itemConfig = new System.Windows.Forms.MenuItem();
+            itemConfig.Index = 0;
+            itemConfig.Text = "Exit";
+            itemConfig.Click += ItemConfig_Click;
+            menu.MenuItems.Add(itemConfig);
+
+            m_notify = new System.Windows.Forms.NotifyIcon();
+            m_notify.Icon = Properties.Resources.Proycontec_Robots_Robot_screen_settings;
+            m_notify.Visible = true;
+            m_notify.DoubleClick += (object send, EventArgs args) => { this.Show(); this.WindowState = WindowState.Normal; this.ShowInTaskbar = true; };
+            m_notify.ContextMenu = menu;
+            m_notify.Text = "PLC To GMES";
+            Version ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            string str = string.Format("PLC To GMES: v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Build);
+            notiftyBalloonTip(str, 1000);
+        }
+        private void ItemConfig_Click(object sender, EventArgs e)
+        {
+         
+            this.Close();
+            Environment.Exit(0);
+            SystemLog.Output(SystemLog.MSG_TYPE.Err, "PLC To GMES", e.ToString());
+        }
+        private void notiftyBalloonTip(string message, int showTime, string title = null)
+        {
+            if (m_notify == null)
+                return;
+            if (title == null)
+                m_notify.BalloonTipTitle = "PLC To GMES";
+            else
+                m_notify.BalloonTipTitle = title;
+            m_notify.BalloonTipText = message;
+            m_notify.ShowBalloonTip(showTime);
         }
         protected override void OnStateChanged(EventArgs e)
         {
@@ -384,16 +428,22 @@ namespace TLMSMESGETDATA
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
+            this.WindowState = WindowState.Minimized;
+            e.Cancel = true;
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            tmrCallBgWorker.Tick -= new EventHandler(tmrCallBgWorker_Tick);
+            bgWorker.DoWork -= new DoWorkEventHandler(bg_DoWork);
+            bgWorker.ProgressChanged -= BgWorker_ProgressChanged;
+            bgWorker.RunWorkerCompleted -= new RunWorkerCompletedEventHandler(bg_RunWorkerCompleted);
 
             if (m_timerEvent != null)
                 EventBroker.RemoveTimeEvent(EventBroker.EventID.etUpdateMe, m_timerEvent);
             EventBroker.RemoveObserver(EventBroker.EventID.etLog, m_observerLog);
             EventBroker.Relase();
+            
         }
 
         private void Btn_test_Click(object sender, RoutedEventArgs e)
@@ -405,12 +455,14 @@ namespace TLMSMESGETDATA
                 btn_disconnect.Content = "Stop";
                 btn_connect.IsEnabled = false;
                 btn_disconnect.IsEnabled = true;
-                //   Plc.Instance.Connect("172.16.1.64");
-
+          
+                LoadDataMQCStarting();
+                CountRun = 1;
             }
             catch (Exception exc)
             {
-                MessageBox.Show(exc.Message);
+            
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "get data first test", exc.Message);
 
             }
         }
@@ -428,61 +480,384 @@ namespace TLMSMESGETDATA
             }
             catch (Exception exc)
             {
-                MessageBox.Show(exc.Message);
+             //   MessageBox.Show(exc.Message);
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "disconnect", exc.Message);
             }
         }
 
-        private void Btn_getData_Click(object sender, RoutedEventArgs e)
-        {
-            Stopwatch stopwatch = new Stopwatch();
+   
+     
 
-            stopwatch.Start();
-            Plc.Instance.Connect("172.16.1.64");
+     
+
+        public void LoadDataMQCStarting ()
+        {
+            stopwatch = new Stopwatch();
             try
             {
-                var ListTag = Plc.Instance.ReadTags(tags);
-                if (ListTag != null)
+                stopwatch.Start();
+                if (ListMachines != null)
                 {
-                  
+                    foreach (var machine in ListMachines)
+                    {
+                        Plc.Instance.Connect(machine.IP);
+                        DataMQC dataMQC = null;
+                        if (Plc.Instance.ConnectionState == ConnectionStates.Online)
+                        {// doc barcode truoc
+                            var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
+                          
+                                dataMQC = new DataMQC();
+                                dataMQC.PLC_Barcode = barcode;
+
+
+                                var ListTag = Plc.Instance.ReadTags(tags);
+                                if (ListTag != null && ListTag.Count == 4)
+                                {
+                                    MachineOperation ma1 = new MachineOperation();
+                                    ma1.Line = machine.Line;
+                                    ma1.IP = machine.IP;
+                                    ma1.Output = (ListTag[0].ItemValue.ToString() != null) ? double.Parse(ListTag[0].ItemValue.ToString()) : 0;
+                                    ma1.NG = (ListTag[1].ItemValue.ToString() != null) ? double.Parse(ListTag[1].ItemValue.ToString()) : 0;
+                                    ma1.Rework = (ListTag[2].ItemValue.ToString() != null) ? double.Parse(ListTag[2].ItemValue.ToString()) : 0;
+                                    ma1.ONOFF= (ListTag[3].ItemValue.ToString() != null) ? ListTag[3].ItemValue.ToString() : "";
+                                    ma1.Status = Plc.Instance.ConnectionState.ToString();
+                                    ma1.Lot = barcode;
+                                    dataMQC.DateTimeReset = DateTime.Now;
+                                    dataMQC.Good_Products_Total = ma1.Output;
+                                    dataMQC.NG_Products_Total = ma1.NG;
+                                    dataMQC.RW_Products_Total = ma1.Rework;
+                                    dataMQC.STARTSTOP = ma1.ONOFF;
+                                 
+                                    dataMQC.NG_Products_NG_ = new int[38];
+                                    int CountNG = 0;
+                                    int CountRW = 0;
+                                    machineOperations.Add(ma1);
+                                    if (dataMQC.NG_Products_Total > 0)
+                                    {
+                                        var ListNG = Plc.Instance.ReadTags(tagsError);
+
+                                        foreach (var item in ListNG)
+                                        {
+                                            dataMQC.NG_Products_NG_[CountNG] = int.Parse(item.ItemValue.ToString());
+                                            CountNG ++;
+                                        }
+                                    }
+                                    dataMQC.RW_Products_NG_ = new int[38];
+                                    if (dataMQC.RW_Products_Total > 0)
+                                    {
+                                        var ListRW = Plc.Instance.ReadTags(tagsRework);
+
+                                        foreach (var item in ListRW)
+                                        {
+                                            dataMQC.RW_Products_NG_[CountRW] = int.Parse(item.ItemValue.ToString());
+                                            CountRW++;
+                                        }
+                                    }
+
+                                
+                            }
+                            else
+                            {
+                                SystemLog.Output(SystemLog.MSG_TYPE.War, "PLC readtag fail :", machine.IP);
+                            }
+                            if (dataMQC != null)
+                            {
+                                if (dataMQC.PLC_Barcode.Contains("0010;B01;B01"))
+                                {
+                                    Uploaddata uploaddata = new Uploaddata();
+                                    if (CountRun == 0 && cb_GetFirstValues.IsChecked == true)
+                                    {
+                                        uploaddata.InsertMQCUpdateRealtime(dataMQC, machine.Line, false);
+                                    
+                                    }
+                                    var StockAvaiable = uploaddata.QuantityCanRun(dataMQC.PLC_Barcode);
+                                    //  double ReadyQty = readyGo(lot);
+
+                                    if (StockAvaiable > 0)
+                                    {
+
+                                        Plc.Instance.Write("DB151.DBW0", (uint)StockAvaiable);
+
+                                    }
+                                    else
+                                    {
+
+                                        Plc.Instance.Write("DB151.DBW4", (uint)Math.Abs(StockAvaiable));
+
+                                    }
+                                }
+                                else
+                                {
+                                    SystemLog.Output(SystemLog.MSG_TYPE.War, "Barcode wrong format :", dataMQC.PLC_Barcode);
+                                }
+
+                            }
+                            else
+                            {
+                                SystemLog.Output(SystemLog.MSG_TYPE.War, "Data MQC = null :", machine.IP);
+                            }
+                        }
+                        else
+                        {
+                            MachineOperation ma1 = new MachineOperation();
+                            ma1.Line = machine.Line;
+                            ma1.IP = machine.IP;
+                            ma1.Status = Plc.Instance.ConnectionState.ToString();
+                            machineOperations.Add(ma1);
+                            SystemLog.Output(SystemLog.MSG_TYPE.War, "machine is not online", machine.IP);
+                        }
+
+                        keyValuePairsOld.Add(machine.IP, dataMQC);
+                       
+                    }
+                    datagridMachines.ItemsSource = machineOperations;
                 }
-                var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
-                if (barcode != null)
+                else
                 {
-                   
+                    SystemLog.Output(SystemLog.MSG_TYPE.War, "list machine = null", "");
+                }
+                    stopwatch.Stop();
+
+                }            
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "Read PLC fail", ex.Message);
+            }
+        }
+
+        private DataMQC GetDataMQCRealtime (string IP, string line, DataMQC dataOld)
+        {
+            DataMQC dataMQC = null;
+            try
+            {
+                Plc.Instance.Connect(IP);
+
+                if (Plc.Instance.ConnectionState == ConnectionStates.Online)
+                {// doc barcode truoc
+                    var ListTag = Plc.Instance.ReadTags(tags);
+
+                    if (ListTag.Count == 4)
+                    {
+                        MachineOperation ma1 = new MachineOperation();
+                        ma1.Line = line;
+                        ma1.IP = IP;
+                        ma1.Output = (ListTag[0].ItemValue.ToString() != null) ? double.Parse(ListTag[0].ItemValue.ToString()) : 0;
+                        ma1.NG = (ListTag[1].ItemValue.ToString() != null) ? double.Parse(ListTag[1].ItemValue.ToString()) : 0;
+                        ma1.Rework = (ListTag[2].ItemValue.ToString() != null) ? double.Parse(ListTag[2].ItemValue.ToString()) : 0;
+                        ma1.ONOFF = (ListTag[3].ItemValue.ToString() != null) ? ListTag[3].ItemValue.ToString() : "";
+                        ma1.Status = Plc.Instance.ConnectionState.ToString();
+                        if (dataOld != null)
+                        {
+                            #region Running
+                            if (dataOld.STARTSTOP == "False" && ma1.ONOFF == "False")
+                            {
+                                dataMQC = new DataMQC();
+                                ma1.Lot = dataOld.PLC_Barcode;
+                                dataMQC.PLC_Barcode = dataOld.PLC_Barcode;
+                                dataMQC.Good_Products_Total = ma1.Output;
+                                dataMQC.NG_Products_Total = ma1.NG;
+                                dataMQC.RW_Products_Total = ma1.Rework;
+                                dataMQC.STARTSTOP = ma1.ONOFF;
+                            
+                                if (dataOld.PLC_Barcode.Contains("0010;B01;B01"))
+                                {
+                                    dataMQC.NG_Products_NG_ = new int[38];
+
+                                    int CountNG = 0;
+                                    int CountRW = 0;
+                                    if (dataMQC.NG_Products_Total > dataOld.NG_Products_Total)
+                                    {
+                                        var ListNG = Plc.Instance.ReadTags(tagsError);
+
+                                        foreach (var item in ListNG)
+                                        {
+                                            dataMQC.NG_Products_NG_[CountNG] = int.Parse(item.ItemValue.ToString());
+                                            CountNG++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        dataMQC.NG_Products_NG_ = dataOld.NG_Products_NG_;
+
+                                    }
+                                    dataMQC.RW_Products_NG_ = new int[38];
+                                    if (dataMQC.RW_Products_Total > dataOld.RW_Products_Total)
+                                    {
+                                        var ListRW = Plc.Instance.ReadTags(tagsRework);
+
+                                        foreach (var item in ListRW)
+                                        {
+                                            dataMQC.RW_Products_NG_[CountRW] = int.Parse(item.ItemValue.ToString());
+                                            CountRW++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        dataMQC.RW_Products_NG_ = dataOld.RW_Products_NG_;
+                                    }
+
+                                }
+                                else
+                                {
+                                    var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
+                                    dataMQC.PLC_Barcode = barcode;
+                                    ma1.Lot = barcode;
+                                    SystemLog.Output(SystemLog.MSG_TYPE.War, "Barcode is wrong format: IPMachine :", IP);
+                                }
+                                machineOperations.Add(ma1);
+                            }
+
+                            #endregion
+                            #region chuyen giao giua chay va reset
+                            else if (dataOld.STARTSTOP == "False" && ma1.ONOFF == "True")
+                            {
+                                var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
+                                ma1.Lot = barcode;
+                               
+
+                                    if (dataOld.PLC_Barcode.Contains("0010;B01;B01"))
+                                    {
+                                        dataMQC = new DataMQC();
+                                        ma1.Lot = barcode;
+                                        dataMQC.PLC_Barcode = barcode;
+                                        dataMQC.Good_Products_Total = ma1.Output;
+                                        dataMQC.NG_Products_Total = ma1.NG;
+                                        dataMQC.RW_Products_Total = ma1.Rework;
+                                        dataMQC.STARTSTOP = ma1.ONOFF;
+                                       
+
+                                        dataMQC.NG_Products_NG_ = new int[38];
+
+                                        int CountNG = 0;
+                                        int CountRW = 0;
+                                        if (dataMQC.NG_Products_Total > dataOld.NG_Products_Total)
+                                        {
+                                            var ListNG = Plc.Instance.ReadTags(tagsError);
+
+                                            foreach (var item in ListNG)
+                                            {
+                                                dataMQC.NG_Products_NG_[CountNG] = int.Parse(item.ItemValue.ToString());
+                                                CountNG++;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            dataMQC.NG_Products_NG_ = dataOld.NG_Products_NG_;
+
+                                        }
+                                        dataMQC.RW_Products_NG_ = new int[38];
+                                        if (dataMQC.RW_Products_Total > dataOld.RW_Products_Total)
+                                        {
+                                            var ListRW = Plc.Instance.ReadTags(tagsRework);
+
+                                            foreach (var item in ListRW)
+                                            {
+                                                dataMQC.RW_Products_NG_[CountRW] = int.Parse(item.ItemValue.ToString());
+                                                CountRW++;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            dataMQC.RW_Products_NG_ = dataOld.RW_Products_NG_;
+                                        }
+
+
+
+                                    }
+                                    else
+                                    {
+
+                                        dataMQC = dataOld;
+                                    SystemLog.Output(SystemLog.MSG_TYPE.War, "Barcode is wrong format: IPMachine :", IP);
+
+                                }
+                                machineOperations.Add(ma1);
+                            }
+                              
+                                #endregion 
+                            else if (dataOld.STARTSTOP == "True" && ma1.ONOFF == "True")
+                            {
+                              
+                                var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
+                                ma1.Lot = barcode;
+                                machineOperations.Add(ma1);
+                                dataMQC = new DataMQC();
+                                dataMQC.STARTSTOP = ma1.ONOFF;
+                                dataMQC.PLC_Barcode = barcode;
+
+                            }
+                            else if (dataOld.STARTSTOP == "True" && ma1.ONOFF == "False")
+                            {
+                                var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
+                                ma1.Lot = barcode;
+                                machineOperations.Add(ma1);
+                                dataMQC = new DataMQC();
+                                dataMQC.STARTSTOP = ma1.ONOFF;
+                                dataMQC.PLC_Barcode = barcode;
+                                
+
+                            }
+                            else
+                            {
+                                var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
+                                ma1.Lot = barcode;
+                                machineOperations.Add(ma1);
+                                dataMQC = new DataMQC();
+                                dataMQC.STARTSTOP = ma1.ONOFF;
+                                dataMQC.PLC_Barcode = barcode;
+                            }
+                        }
+                        else
+                        {
+                            dataMQC = new DataMQC();
+                            var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
+                            ma1.Lot = barcode;
+                            dataMQC.STARTSTOP = ma1.ONOFF;
+                            dataMQC.PLC_Barcode = barcode;
+                            dataMQC.Good_Products_Total = ma1.Output;
+                            dataMQC.NG_Products_Total = ma1.NG;
+                            dataMQC.RW_Products_Total = ma1.Rework;
+                            dataMQC.STARTSTOP = ma1.ONOFF;
+                            machineOperations.Add(ma1);
+                            SystemLog.Output(SystemLog.MSG_TYPE.War, "Data old = null: IPMachine :", IP);
+                        }
+                       
+
+                    }
+                    else
+                    {
+                        MachineOperation ma1 = new MachineOperation();
+                        ma1.Line = line;
+                        ma1.IP = IP;
+                       
+                        ma1.Status = Plc.Instance.ConnectionState.ToString();
+                        machineOperations.Add(ma1);
+                        dataMQC = dataOld;
+                        SystemLog.Output(SystemLog.MSG_TYPE.War, "Readtag fail: IPMachine ", IP);
+                    }
+
+                }
+                else
+                {
+                    MachineOperation ma1 = new MachineOperation();
+                    ma1.Line = line;
+                    ma1.IP = IP;
+                    ma1.Status = Plc.Instance.ConnectionState.ToString();
+                    machineOperations.Add(ma1);
+                    dataMQC = dataOld;
+                    SystemLog.Output(SystemLog.MSG_TYPE.War, "Machine is offline", IP);
                 }
 
-
-                //var ListTagError = Plc.Instance.ReadTags(tagsError);
-
-                //var ListTagRework = Plc.Instance.ReadTags(tagsRework);
-                stopwatch.Stop();
-                SystemLog.Output(SystemLog.MSG_TYPE.Nor, "Tack-time", stopwatch.ElapsedMilliseconds.ToString() + " ms");
             }
             catch (Exception ex)
             {
 
-                SystemLog.Output(SystemLog.MSG_TYPE.Err, "Tack-time", ex.Message);
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "DataMQC GetDataMQCRealtime line "+ line, ex.Message);
             }
-        
+ 
+            return dataMQC;
         }
-        public void LoadDataRealTime ()
-        {
-            try
-            {
-                var ListTag = Plc.Instance.ReadTags(tags);
-                if (ListTag != null)
-                {
-                
-                  
-                }
 
-            }
-            catch (Exception ex)
-            {
-
-                SystemLog.Output(SystemLog.MSG_TYPE.Err, "LoadDataRealTime ()", ex.Message);
-            }
-
-        }
     }
 }

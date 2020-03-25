@@ -12,6 +12,11 @@ namespace TLMSMESGETDATA.PLC2
         public const string NG_Products_Total = "DB3.DBW0";
         public const string RW_Products_Total = "DB4.DBW0";
         public const string barcode1 = "DB7.DBB100";
+        public const string AddingAvaiable = "DB1.DBD6";
+        public const string GapQty = "DB1.DBD2";
+        public const string OnOFF = "DB9.DBX0.2";
+        public const string RealQty = "DB151.DBW0";
+        public const string GapValueQty = "DB151.DBW4";
         public static List<string> List38Errors()
         {
             string barcodeStart = "DB3.DBW";
@@ -36,7 +41,7 @@ namespace TLMSMESGETDATA.PLC2
         {
             string barcodeStart = "DB7.DBB";
             List<string> list = new List<string>();
-            for (int i = 100; i < 125; i++)
+            for (int i = 100; i < 126; i++)
             {
                 list.Add(barcodeStart + i.ToString());
             }

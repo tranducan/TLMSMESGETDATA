@@ -32,8 +32,7 @@ namespace TLMSMESGETDATA.PLC2
 
         public ConnectionStates ConnectionState { get { return plcDriver != null ? plcDriver.ConnectionState : ConnectionStates.Offline; } }
 
-        public DB1 Db1 { get; set; }
-
+      
         public TimeSpan CycleReadTime { get; private set; }
 
         #endregion
@@ -216,22 +215,22 @@ namespace TLMSMESGETDATA.PLC2
             return valid;
         }
 
-        private void RefreshTags()
-        {
-            try
-            {
+        //private void RefreshTags()
+        //{
+        //    try
+        //    {
 
           
-            plcDriver.ReadClass(Db1, 2);
-            }
-            catch (Exception ex)
-            {
+        //    plcDriver.ReadClass(Db1, 2);
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-                SystemLog.Output(SystemLog.MSG_TYPE.Err, "RefreshTags()",ex.Message );
+        //        SystemLog.Output(SystemLog.MSG_TYPE.Err, "RefreshTags()",ex.Message );
 
-            }
+        //    }
 
-        }
+        //}
 
         #endregion
 

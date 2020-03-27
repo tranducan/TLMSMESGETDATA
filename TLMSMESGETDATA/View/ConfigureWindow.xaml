@@ -1,0 +1,72 @@
+﻿<Window x:Class="TLMSMESGETDATA.View.ConfigureWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TLMSMESGETDATA.View"
+        mc:Ignorable="d"
+        Title="ConfigureWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120*"/>
+            <ColumnDefinition Width="105*"/>
+            <ColumnDefinition Width="172*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="5*"/>
+        </Grid.RowDefinitions>
+        <Label Content="Server Offline" Margin="60,13,70,0" VerticalAlignment="Top" Height="26"/>
+        <TextBox x:Name="txt_serverOffline" Grid.Column="1" Height="23" Margin="20,30,73.6,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <Label Content="User" Grid.Column="1" Margin="125,11,31.6,0" Grid.Row="1" VerticalAlignment="Top" Height="26"/>
+        <TextBox x:Name="txt_userOffline" Grid.Column="2" Height="23" Margin="8.4,14,73.6,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Row="1"/>
+        <Label Content="Password
+               " Grid.Column="1" Margin="90,44,31.6,0" Grid.Row="1" VerticalAlignment="Top" Height="26"/>
+        <CheckBox x:Name="cb_serveroffline" Content="using server offline" HorizontalAlignment="Left" Margin="70,44,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btn_Save" Content="Save" Grid.Column="2" HorizontalAlignment="Left" Margin="10.4,20,0,10" Grid.Row="3" Width="95" Click="btn_Save_Click">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFE3F04E" Offset="0"/>
+                    <GradientStop Color="#FF34BF8F" Offset="1"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+        <Grid Grid.ColumnSpan="3" Grid.RowSpan="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120*"/>
+                <ColumnDefinition Width="105*"/>
+                <ColumnDefinition Width="172*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="4*"/>
+                <RowDefinition Height="4*"/>
+                <RowDefinition Height="4*"/>
+                <RowDefinition Height="4*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Label Content="Server Offline" Margin="60,13,70,0" VerticalAlignment="Top" Height="26"/>
+
+            <Label Content="User" Grid.Column="1" Margin="125,11,31.6,0" Grid.Row="1" VerticalAlignment="Top" Height="26"/>
+
+            <Label Content="Password" Grid.Column="1" Margin="90,44,31.6,0" Grid.Row="1" VerticalAlignment="Top" Height="26"/>
+
+
+            <Button x:Name="btn_Save1" Content="Save" Grid.Column="2" HorizontalAlignment="Left" Margin="10.4,20,0,10" Grid.Row="3" Width="95" Click="btn_Save_Click">
+                <Button.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FFE3F04E" Offset="0"/>
+                        <GradientStop Color="#FF34BF8F" Offset="1"/>
+                    </LinearGradientBrush>
+                </Button.Background>
+            </Button>
+            <Label Content="list product Path" Margin="60,25,70,0" Grid.Row="2" VerticalAlignment="Top"/>
+            <TextBox x:Name="txt_listproductPath" Grid.Column="1" Height="23" Margin="20,28,73.6,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2" Grid.Row="2"/>
+            <PasswordBox x:Name="passwordBox" Grid.Column="2" HorizontalAlignment="Left" Margin="10.4,50,0,0" Grid.Row="1" VerticalAlignment="Top" Width="260"/>
+
+        </Grid>
+
+    </Grid>
+</Window>

@@ -66,16 +66,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Algorithm\SaveObject.cs" />
     <Compile Include="Algorithm\Uploaddata.cs" />
+    <Compile Include="Algorithm\UploadLocalPLCDB.cs" />
     <Compile Include="Model\MachineDisplay.cs" />
+    <Compile Include="Model\SettingClass.cs" />
     <Compile Include="PLC2\PLCData.cs" />
     <Compile Include="SQLUpload\DBSQLServerUtils.cs" />
     <Compile Include="SQLUpload\DBUtils.cs" />
     <Compile Include="SQLUpload\ExportListProduct.cs" />
+    <Compile Include="SQLUpload\LocalPLCSql.cs" />
     <Compile Include="SQLUpload\sqlCON.cs" />
     <Compile Include="SQLUpload\sqlERPCON.cs" />
     <Compile Include="SQLUpload\SQLERPTarget.cs" />
     <Compile Include="SQLUpload\sqlSFT.cs" />
+    <Compile Include="View\ConfigureWindow.xaml.cs">
+      <DependentUpon>ConfigureWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -90,6 +97,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\ConfigureWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\MachineItem.cs" />

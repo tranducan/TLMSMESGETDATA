@@ -38,6 +38,26 @@ namespace TLMSMESGETDATA.Algorithm
                         }
                     }
                 }
+                else if(dataNew.STARTSTOP != dataOld.STARTSTOP)
+                {
+                    _ischange = true;
+                    _dataRaise.Good_Products_Total = dataNew.Good_Products_Total - dataOld.Good_Products_Total;
+                    _dataRaise.NG_Products_Total = dataNew.NG_Products_Total - dataOld.NG_Products_Total;
+                    _dataRaise.RW_Products_Total = dataNew.RW_Products_Total - dataOld.RW_Products_Total;
+                    _dataRaise.PLC_Barcode = dataNew.PLC_Barcode != "" ? dataNew.PLC_Barcode : dataOld.PLC_Barcode;
+                    for (int i = 0; i < 38; i++)
+                    {
+                        if (_dataRaise.NG_Products_Total > 0)
+                        {
+                            _dataRaise.NG_Products_NG_[i] = dataNew.NG_Products_NG_[i] - dataOld.NG_Products_NG_[i];
+                        }
+                        if (_dataRaise.RW_Products_Total > 0)
+                        {
+                            _dataRaise.RW_Products_NG_[i] = dataNew.RW_Products_NG_[i] - dataOld.RW_Products_NG_[i];
+                        }
+                    }
+                }
+
                 else
                 {
                     _ischange = false;

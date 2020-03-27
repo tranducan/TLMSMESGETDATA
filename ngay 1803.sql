@@ -62,26 +62,43 @@ order by model
 select isnull(sum(cast( isnull(data,'0') as int)),0) from m_ERPMQC_REALTIME 
 where lot = 'B511-18120023;0010;B01;B01' and remark != 'RW'
 
+select line, model,SUM(CAST(data as int)) as Tong ,min(cast (inspectdate as datetime) + cast (inspecttime as datetime)) as Mintime, MAX(cast (inspectdate as datetime) + cast (inspecttime as datetime)) as MaxTime
+from m_ERPMQC_REALTIME 
+where 
+cast (inspectdate as datetime) + cast (inspecttime as datetime) >= '20200325 11:00:00'
+and  cast (inspectdate as datetime) + cast (inspecttime as datetime) <= '20200326 11:00:00'
+--and model like '%32222268%' 
+group by model, line
+order by model
+
+
+
+
 select line, model,SUM(CAST(data as int)) as Tong , remark ,min(cast (inspectdate as datetime) + cast (inspecttime as datetime)) as Mintime, MAX(cast (inspectdate as datetime) + cast (inspecttime as datetime)) as MaxTime
 from m_ERPMQC_REALTIME 
 where 
-cast (inspectdate as datetime) + cast (inspecttime as datetime) >= '20200323 11:00:00'
-and  cast (inspectdate as datetime) + cast (inspecttime as datetime) <= '20200324 11:00:00'
-and line ='L04'
+cast (inspectdate as datetime) + cast (inspecttime as datetime) >= '20200325 11:00:00'
+and  cast (inspectdate as datetime) + cast (inspecttime as datetime) <= '20200326 11:00:00'
+--and model like '%32222268%' 
 group by model, line, remark
 order by model
+
+
 ---3/23/2020 9:16:16 PM-3/23/2020 9:23:24 PM
 
 
 select * from  m_ERPMQC_REALTIME where 
-cast (inspectdate as datetime) + cast (inspecttime as datetime) >= '20200323 11:00:00'
-and  cast (inspectdate as datetime) + cast (inspecttime as datetime) <= '20200324 08:00:00'
-and line ='L04'
+cast (inspectdate as datetime) + cast (inspecttime as datetime) >= '20200326 08:00:00'
+and  cast (inspectdate as datetime) + cast (inspecttime as datetime) <= '20200326 14:00:00'
+--and model like '%32222268%'
 order by cast (inspectdate as datetime) + cast (inspecttime as datetime)
-
 
 --3/23/2020 4:20:10 PM-3/23/2020 5:30:06 PM
 ---3/23/2020 9:16:16 PM-3/23/2020 9:23:24 PM
 ---3/23/2020 6:49:47 PM-3/23/2020 6:49:47 PM
+--3/24/2020 10:26:08 AM-3/24/2020 10:43:50 AM
 
 select distinct  line, model from m_ERPMQC_REALTIME where model like '%1227768S11%'
+
+select model from m_ERPMQC_REALTIME where 1=1
+and lot  ='B511-20020052;0010;B01;B01'

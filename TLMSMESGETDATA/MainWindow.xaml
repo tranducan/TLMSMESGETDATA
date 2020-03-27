@@ -55,7 +55,6 @@
             </Label.BorderBrush>
         </Label>
         <Button x:Name="btn_connect" Content="Start" Margin="10,10,0,10" HorizontalAlignment="Left" Width="70" Click="Btn_test_Click"/>
-        <Ellipse Name="ElipsStatus" Margin="406,10,28.6,16" Stroke="#FFD2DF34" Fill="#FFD2EE33" RenderTransformOrigin="3.178,0.608"/>
         <Button x:Name="btn_disconnect" Content="Stop" Margin="85,10,0,10" HorizontalAlignment="Left" Width="70" Click="Btn_disconnect_Click" IsEnabled="False"/>
         <StatusBar HorizontalAlignment="Left" Margin="0,1.2,0,-0.8" Grid.Row="4" Width="320">
             <StatusBarItem>
@@ -71,7 +70,7 @@
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>
-        <CheckBox x:Name="cb_GetFirstValues" Content="Is Get First Values " Margin="211,31,104.6,0" Height="15" VerticalAlignment="Top"/>
+        <CheckBox x:Name="cb_GetFirstValues" Content="Is Get First Values " Margin="188,41,127.6,0" Height="15" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

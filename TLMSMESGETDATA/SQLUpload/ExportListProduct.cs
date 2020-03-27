@@ -10,12 +10,12 @@ namespace TLMSMESGETDATA.SQLUpload
 {
  public  static class ExportListProduct
     {
-    public  static  void exportcsvToPLC()
+    public  static  void exportcsvToPLC(string linkListProduct)
         {
             try
             {
 
-                string path = @"\\172.16.0.5\Program\export" + "\\";
+                string path = linkListProduct;
                 File.Delete(path + "ListProduct.csv");
                 StringBuilder sql = new StringBuilder();
                 sql.Append(@"

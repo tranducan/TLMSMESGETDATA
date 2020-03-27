@@ -60,5 +60,16 @@ namespace TLMSMESGETDATA
 
             return DBSQLServerUtils.GetSFTDBConnection(datasource, database, username, password);
         }
+        public static SqlConnection GetLocalPLCConnection(string _datasource, string  _database, string _user, string _pass)
+        {
+            //Data Source = LONG; Initial Catalog = TEST; Integrated Security = True
+            string datasource = _datasource;
+            string database =_database;
+            string username = _user;
+            string password = _pass;
+
+
+            return DBSQLServerUtils.GetLocalPLCConnection(datasource, database, username, password);
+        }
     }
 }

@@ -14,6 +14,7 @@ public    class SettingClass
         public string password { get; set; }
         public bool usingOfftlineServer { get; set; }
         public string PathListProduct { get; set; }
+        public int timmer { get; set; }
 
     }
 }

@@ -36,6 +36,15 @@ namespace TLMSMESGETDATA.View
             SettingClass.password = passwordBox.Password;
             SettingClass.usingOfftlineServer =(bool) cb_serveroffline.IsChecked;
             SettingClass.PathListProduct = txt_listproductPath.Text.Trim();
+            try
+            {
+                SettingClass.timmer = int.Parse(txt_timer.Text.Trim());
+            }
+            catch (Exception ex)
+            {
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "convert str to int fail", ex.Message);
+                SettingClass.timmer = 30000;
+            }
             Algorithm.SaveObject.Save_data(Algorithm.SaveObject.Pathsave, SettingClass);
 
 
@@ -50,6 +59,7 @@ namespace TLMSMESGETDATA.View
                 txt_serverOffline.Text = SettingClass.OfflineServer;
                 txt_userOffline.Text = SettingClass.userOffline;
                 cb_serveroffline.IsChecked = SettingClass.usingOfftlineServer;
+                txt_timer.Text = SettingClass.timmer.ToString();
                 passwordBox.Password = SettingClass.password;
             }
         }

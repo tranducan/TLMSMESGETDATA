@@ -66,9 +66,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Algorithm\LocalToServer.cs" />
     <Compile Include="Algorithm\SaveObject.cs" />
     <Compile Include="Algorithm\Uploaddata.cs" />
     <Compile Include="Algorithm\UploadLocalPLCDB.cs" />
+    <Compile Include="Logfile\SystemRecord.cs" />
     <Compile Include="Model\MachineDisplay.cs" />
     <Compile Include="Model\SettingClass.cs" />
     <Compile Include="PLC2\PLCData.cs" />

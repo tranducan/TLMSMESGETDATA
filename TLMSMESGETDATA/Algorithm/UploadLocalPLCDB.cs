@@ -102,6 +102,23 @@ namespace TLMSMESGETDATA.Algorithm
             }
             return model;
         }
+        public string GetModelFromLot(string lot)
+        {
+            string model = "";
+            try
+            {
+                string sqlQuery = "select distinct TC047 from SFCTC where TC004 = '" + lot.Substring(0, 4) + "' and TC005 = '" + lot.Substring(5, 8) + "'";
+                sqlERPCON sqlERPCON = new sqlERPCON();
+                model = sqlERPCON.sqlExecuteScalarString(sqlQuery);
+            }
+            catch (Exception ex)
+            {
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "GetModelFromLot (string lot)", ex.Message);
+
+                return "";
+            }
+            return model;
+        }
         public bool InsertToMQC_Realtime(string lot, string line, string item, string data, string Remark, int judge, Model.SettingClass setting)
         {
             try
@@ -117,7 +134,12 @@ namespace TLMSMESGETDATA.Algorithm
                 string time_ = DateTime.Now.ToString("HH:mm:ss");
                 string sqlQuerry = "";
 
-                string model = GetModelFromLot(lot,setting);
+                // string model = GetModelFromLot(lot,setting);
+                string model = GetModelFromLot(lot);// lay model tren server, neu ko lay dc thi lay o local
+                if(model=="")
+                {
+                    model = GetModelFromLot(lot,setting);
+                }
                 sqlQuerry += "insert into m_ERPMQC_REALTIME (serno, lot, model, site, factory, line, process,item,inspectdate,inspecttime, data, judge,status,remark ) values( '";
                 sqlQuerry += serno + "', '" + lot + "', '" + model + "', '" + site + "', '" + factory + "', '" + line +
                "', '" + process + "', '" + item + "', '" + date_ + "', '" + time_ + "', '" + data + "', '" + judge.ToString() + "', '" + status + "', '" + Remark + "' )";

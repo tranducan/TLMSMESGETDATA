@@ -15,6 +15,9 @@ public    class SettingClass
         public bool usingOfftlineServer { get; set; }
         public string PathListProduct { get; set; }
         public int timmer { get; set; }
+        public int PLCTimeOut { get; set; }
+        public bool IsStartupWindow { get; set; }
+
 
     }
 }

@@ -86,18 +86,26 @@ namespace TLMSMESGETDATA.PLC2
 
         #region Public methods
 
-        public void Connect(string ipAddress)
+        public void Connect(string ipAddress, int timeOut)
         {
             try
             {
-
-          
+              
             if (!IsValidIp(ipAddress))
             {
                 throw new ArgumentException("Ip address is not valid");
             }
             plcDriver = new S7NetPlcDriver(CpuType.S71200, ipAddress, 0, 1);
-            plcDriver.Connect();
+                var task = Task.Run(() => plcDriver.Connect());
+                if (task.Wait(TimeSpan.FromMilliseconds(timeOut)))
+                {
+                    return;
+                }
+                else
+                {
+                    SystemLog.Output(SystemLog.MSG_TYPE.War, "Timeout : " + timeOut + " ms", "Function Connection");
+                }
+          //  plcDriver.Connect();
             }
             catch (Exception ex) 
             {

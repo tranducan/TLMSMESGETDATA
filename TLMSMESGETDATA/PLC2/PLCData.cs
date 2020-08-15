@@ -16,6 +16,7 @@ namespace TLMSMESGETDATA.PLC2
             DataTable dt = new DataTable();
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append("select factory, line, modelPLC, IPPLC from m_ipPLC where isactive = 'True'");
+            stringBuilder.Append(" and process ='" + "MQC" + "' ");
             stringBuilder.Append(" order by line ");
             sqlCON sqlERPCON = new sqlCON();
 

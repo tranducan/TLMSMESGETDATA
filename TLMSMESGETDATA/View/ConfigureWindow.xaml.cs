@@ -35,7 +35,9 @@ namespace TLMSMESGETDATA.View
             SettingClass.userOffline = txt_userOffline.Text.Trim();
             SettingClass.password = passwordBox.Password;
             SettingClass.usingOfftlineServer =(bool) cb_serveroffline.IsChecked;
+            SettingClass.IsStartupWindow = (bool)cb_StartupWindow.IsChecked;
             SettingClass.PathListProduct = txt_listproductPath.Text.Trim();
+           
             try
             {
                 SettingClass.timmer = int.Parse(txt_timer.Text.Trim());
@@ -45,6 +47,21 @@ namespace TLMSMESGETDATA.View
                 SystemLog.Output(SystemLog.MSG_TYPE.Err, "convert str to int fail", ex.Message);
                 SettingClass.timmer = 30000;
             }
+            try
+            {
+                SettingClass.PLCTimeOut = int.Parse(txt_PLCTimeOut.Text.Trim());
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "convert timeout to int fail", ex.Message);
+                SettingClass.timmer = 3000;
+            }
+            if ((bool)cb_StartupWindow.IsChecked)
+                StartUpWindow.RegistrationStartUp();
+            else
+                StartUpWindow.DeleteStartUp();
+
             Algorithm.SaveObject.Save_data(Algorithm.SaveObject.Pathsave, SettingClass);
 
 
@@ -59,8 +76,12 @@ namespace TLMSMESGETDATA.View
                 txt_serverOffline.Text = SettingClass.OfflineServer;
                 txt_userOffline.Text = SettingClass.userOffline;
                 cb_serveroffline.IsChecked = SettingClass.usingOfftlineServer;
+                cb_StartupWindow.IsChecked = SettingClass.IsStartupWindow;
                 txt_timer.Text = SettingClass.timmer.ToString();
+                txt_PLCTimeOut.Text = SettingClass.PLCTimeOut.ToString();
                 passwordBox.Password = SettingClass.password;
+
+                
             }
         }
     }

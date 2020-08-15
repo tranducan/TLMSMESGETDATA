@@ -163,6 +163,8 @@ namespace TLMSMESGETDATA
                   machineOperations = new List<MachineOperation>();
                     foreach (var machine in ListMachines)
                     {
+                        try
+                        {
                         DataMQC MQCIPOld = keyValuePairsOld[machine.IP];
                         DataMQC mQCIP = new DataMQC();
                         mQCIP =  GetDataMQCRealtime(machine.IP, machine.Line, MQCIPOld);
@@ -253,6 +255,12 @@ namespace TLMSMESGETDATA
                             SystemLog.Output(SystemLog.MSG_TYPE.War, "Line : " + machine.Line, " DATA MQC = NULL ");
                         }
                         }
+                        catch (Exception ex)
+                        {
+
+                            SystemLog.Output(SystemLog.MSG_TYPE.Err, "PLC IP : " + machine.IP, ex.Message);
+                        }
+                    }
 
                     }
                 
@@ -386,6 +394,13 @@ namespace TLMSMESGETDATA
             Version ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             string str = string.Format("PLC To GMES: v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Build);
             notiftyBalloonTip(str, 1000);
+
+
+            StartTimerGetPLCData();
+
+
+
+
         }
 
         private void ItemExit_Click(object sender, EventArgs e)
@@ -484,7 +499,35 @@ namespace TLMSMESGETDATA
 
 
         }
+        private void StartTimerGetPLCData()
+        {
+            try
+            {
+                tmrCallBgWorker.Interval = SettingClass.timmer > 0 ? SettingClass.timmer : 500;
+                tmrCallBgWorker.Start();
+                btn_connect.Content = "Starting";
+                btn_disconnect.Content = "Stop";
+                btn_connect.IsEnabled = false;
+                btn_disconnect.IsEnabled = true;
 
+                SettingClass = (SettingClass)SaveObject.Load_data(SaveObject.Pathsave);
+                if (SettingClass.PLCTimeOut == 0)
+                    SettingClass.PLCTimeOut = 3000;
+                if (SettingClass.timmer == 0)
+                    SettingClass.timmer = 30000;
+                LoadDataMQCStarting();
+                CountRun = 1;
+                //    SettingClass = (SettingClass) SaveObject.Load_data(SaveObject.Pathsave);
+
+
+            }
+            catch (Exception exc)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "get data first test", exc.Message);
+
+            }
+        }
         private void Btn_test_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -497,6 +540,10 @@ namespace TLMSMESGETDATA
                 btn_disconnect.IsEnabled = true;
               
                 SettingClass = (SettingClass)SaveObject.Load_data(SaveObject.Pathsave);
+                if (SettingClass.PLCTimeOut == 0)
+                    SettingClass.PLCTimeOut = 3000;
+                if (SettingClass.timmer == 0)
+                    SettingClass.timmer = 30000;
                 LoadDataMQCStarting();
                 CountRun = 1;
             //    SettingClass = (SettingClass) SaveObject.Load_data(SaveObject.Pathsave);
@@ -538,7 +585,7 @@ namespace TLMSMESGETDATA
                 {
                     foreach (var machine in ListMachines)
                     {
-                        Plc.Instance.Connect(machine.IP);
+                        Plc.Instance.Connect(machine.IP, SettingClass.PLCTimeOut);
                         DataMQC dataMQC = null;
                         if (Plc.Instance.ConnectionState == ConnectionStates.Online)
                         {// doc barcode truoc
@@ -696,7 +743,7 @@ namespace TLMSMESGETDATA
             DataMQC dataMQC = null;
             try
             {
-                Plc.Instance.Connect(IP);
+                Plc.Instance.Connect(IP,SettingClass.PLCTimeOut);
 
                 if (Plc.Instance.ConnectionState == ConnectionStates.Online)
                 {// doc barcode truoc
@@ -769,6 +816,13 @@ namespace TLMSMESGETDATA
                                     dataMQC.PLC_Barcode = barcode;
                                     ma1.Lot = barcode;
                                     SystemLog.Output(SystemLog.MSG_TYPE.War, "Barcode is wrong format: IPMachine :", IP);
+                                }
+
+                                if(dataMQC.Good_Products_Total ==0 && dataMQC.NG_Products_Total ==0 && dataMQC.RW_Products_Total == 0)
+                                {
+                                    var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
+                                    dataMQC.PLC_Barcode = barcode;
+                                    ma1.Lot = barcode;
                                 }
                                 machineOperations.Add(ma1);
                             }
@@ -849,10 +903,12 @@ namespace TLMSMESGETDATA
                                 {
                                     if (dataOld != null)
                                     {
-                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Line: " + line + " QR code: " + dataOld.PLC_Barcode, " Reset ");
-                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Line: " + line + " QR code: " + dataOld.PLC_Barcode, " OP " + dataOld.Good_Products_Total);
-                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Line: " + line + " QR code: " + dataOld.PLC_Barcode, " NG " + dataOld.NG_Products_Total);
-                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Line: " + line + " QR code: " + dataOld.PLC_Barcode, " RW " + dataOld.RW_Products_Total);
+                                        Uploaddata uploaddata = new Uploaddata();
+                                        string model = uploaddata.GetModelFromLot(dataOld.PLC_Barcode);
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Line: " + line + " QR code: " + dataOld.PLC_Barcode +" Model: "+ model, " Reset ");
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Line: " + line + " QR code: " + dataOld.PLC_Barcode + " Model: " + model, " OP " + dataOld.Good_Products_Total);
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Line: " + line + " QR code: " + dataOld.PLC_Barcode + " Model: " + model, " NG " + dataOld.NG_Products_Total);
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Line: " + line + " QR code: " + dataOld.PLC_Barcode + " Model: " + model, " RW " + dataOld.RW_Products_Total);
                                     }
                                 }
                                 catch (Exception ex)

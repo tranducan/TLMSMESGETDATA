@@ -70,6 +70,7 @@
     <Compile Include="Algorithm\SaveObject.cs" />
     <Compile Include="Algorithm\Uploaddata.cs" />
     <Compile Include="Algorithm\UploadLocalPLCDB.cs" />
+    <Compile Include="Logfile\StartUpWindowcs.cs" />
     <Compile Include="Logfile\SystemRecord.cs" />
     <Compile Include="Model\MachineDisplay.cs" />
     <Compile Include="Model\SettingClass.cs" />

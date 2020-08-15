@@ -20,7 +20,7 @@ namespace TLMSMESGETDATA.Algorithm
                 if (i < files.Length - 1)
                     _FileName += files[i] + "\\";
                 else
-                    _FileName +=  files[i];
+                    _FileName += "temp-"+files[i];
             }
 
             FileStream fs;

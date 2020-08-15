@@ -57,6 +57,9 @@
             <PasswordBox x:Name="passwordBox" Grid.Column="2" HorizontalAlignment="Left" Margin="10.4,50,0,0" Grid.Row="1" VerticalAlignment="Top" Width="260"/>
             <Label Content="Timmer Bg worker" Margin="60,10,70,0" Grid.Row="3" VerticalAlignment="Top"/>
             <TextBox x:Name="txt_timer" Grid.Column="1" Margin="20,10,49.6,47" Grid.Row="3" TextWrapping="Wrap"/>
+            <Label Content="PLC Response Time Out" Margin="60,45,35,0" Grid.Row="3" VerticalAlignment="Top"/>
+            <TextBox x:Name="txt_PLCTimeOut" Grid.Column="1" Margin="20,45,49.6,12" Grid.Row="3" TextWrapping="Wrap"/>
+            <CheckBox x:Name="cb_StartupWindow" Content="Startup with Window" Grid.Column="2" HorizontalAlignment="Left" Margin="25.4,10,0,0" Grid.Row="3" VerticalAlignment="Top" Width="140"/>
 
         </Grid>
 

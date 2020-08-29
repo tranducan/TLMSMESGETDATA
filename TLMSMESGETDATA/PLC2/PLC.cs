@@ -189,9 +189,12 @@ namespace TLMSMESGETDATA.PLC2
                 return null;
             }
             List<Tag> tags = plcDriver.ReadItems(tagsinput);
+
+           //     var test = S7.Net.Conversion.ValToBinString(tags[0].ItemValue);
             foreach (var item in tags)
-            {
-                char c = Convert.ToChar(int.Parse(item.ItemValue.ToString()));
+                {
+                    char c = Convert.ToChar(int.Parse(item.ItemValue.ToString()));
+                  //  char c = Convert.ToChar((float)item.ItemValue);
                 barcode += c;
             }
             }

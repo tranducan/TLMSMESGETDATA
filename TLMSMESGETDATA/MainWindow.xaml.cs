@@ -48,11 +48,13 @@ namespace TLMSMESGETDATA
         System.Threading.Timer tmrEnsureWorkerGetsCalled;
         List<Tag> tagsError;
         List<string> ListBarcode;
+        
         List<string> ListError;
         List<Tag> tagsbarcode;
         List<string> ListRework;
         List<Tag> tagsRework;
         List<Tag> tags;
+    
         DispatcherTimer timer = new DispatcherTimer();
         List<MachineItem> ListMachines;
         // this timer calls bgWorker again and again after regular intervals
@@ -327,6 +329,7 @@ namespace TLMSMESGETDATA
             ListBarcode = VariablePLC.barcodeaddress();
 
             tagsbarcode = new List<Tag>();
+
             ListTagWrite = new List<Tag>();
             Tag tag = new Tag(VariablePLC.AddingAvaiable, "");
             ListTagWrite.Add(tag);
@@ -370,7 +373,7 @@ namespace TLMSMESGETDATA
                 //EventBroker.AddTimeEvent(EventBroker.EventID.etUpdateMe, m_timerEvent, 20000, true);//66분에 한번씩
             }
             LoadBackgroundWorker();
-            LoadAdress();
+       //     LoadAdress();
             System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu();
 
             System.Windows.Forms.MenuItem itemConfig = new System.Windows.Forms.MenuItem();
@@ -396,7 +399,7 @@ namespace TLMSMESGETDATA
             notiftyBalloonTip(str, 1000);
 
 
-            StartTimerGetPLCData();
+          //  StartTimerGetPLCData();
 
 
 
@@ -590,6 +593,7 @@ namespace TLMSMESGETDATA
                         if (Plc.Instance.ConnectionState == ConnectionStates.Online)
                         {// doc barcode truoc
                             var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
+                          //  var bar = Plc.Instance.R
                           
                                 dataMQC = new DataMQC();
                                 dataMQC.PLC_Barcode = barcode;
@@ -1058,5 +1062,101 @@ namespace TLMSMESGETDATA
             return dataMQC;
         }
 
+        private void btn_GetValue_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                List<string> listQRMES = new List<string>();
+                listQRMES = VariablePLC.barcodeaddressMES();
+                List<string> listID = new List<string>();
+                listID = VariablePLC.barcodeaddresID();
+                List<Tag> listBarcodeMES = new List<Tag>();
+                List<Tag> listBarcodeID = new List<Tag>();
+
+                //List<Tag> QRMES = new List<Tag>();
+                //QRMES.Add(new PLCSimenNetWrapper.Tag(VariablePLC.MESQR, ""));
+                //List<Tag> QRID = new List<Tag>();
+                //QRID.Add(new PLCSimenNetWrapper.Tag(VariablePLC.IDWorker, ""));
+
+                string IPTest = "172.16.1.145";
+
+                Plc.Instance.Connect(IPTest, 3000);
+                var PLCStatus = Plc.Instance.ConnectionState;
+                if (PLCStatus == ConnectionStates.Online)
+                {
+                    //  var PlcQRMES = Plc.Instance.ReadTagsToString(QRMES).ToString();
+                    //var plcQRID = Plc.Instance.ReadTagsToString(QRID).ToString();
+                    var numberMESQR = "";
+                    List<Tag> listNumberQR = new List<Tag>();
+                    listNumberQR.Add(new PLCSimenNetWrapper.Tag(VariablePLC.NumberCharIDWorker, ""));
+                    listNumberQR.Add(new PLCSimenNetWrapper.Tag(VariablePLC.NumberCharMESQR, ""));
+
+                    var listTagNumber = Plc.Instance.ReadTags(listNumberQR);
+                    int NumberCharIDWorker = 0;
+                    int NumberCharMESQR = 0;
+                    if (listTagNumber.Count == 2)
+                    {
+                         NumberCharIDWorker = int.Parse(listTagNumber[0].ItemValue.ToString());
+                        NumberCharMESQR = int.Parse(listTagNumber[1].ItemValue.ToString());
+                    }
+
+                    for (int i = 0; i < NumberCharMESQR; i++)
+                    {
+                        listBarcodeMES.Add(new PLCSimenNetWrapper.Tag(listQRMES[i], ""));
+                    }
+                    for (int i = 0; i < NumberCharIDWorker; i++)
+                    {
+                        listBarcodeID.Add(new PLCSimenNetWrapper.Tag(listID[i], ""));
+                    }
+                    
+                    var stringMES = Plc.Instance.ReadTagsToString(listBarcodeMES);
+                    var stringID = Plc.Instance.ReadTagsToString(listBarcodeID);
+                   
+                    // if (plcQRID.Count == 1)
+                   txt_IDQR.Text = stringID;//((uint)OvenSV.ItemValue).ConvertToFloat();
+                    txt_IDQRMES.Text = stringMES;
+                  //  if (PlcQRMES.Count == 1)
+                       // txt_IDQRMES.Text = plcQRID;
+                }
+
+
+            }
+            catch (Exception  ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, ex.Source, ex.Message);
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+
+                string IPTest = "172.16.1.145";
+
+                Plc.Instance.Connect(IPTest, 3000);
+                var PLCStatus = Plc.Instance.ConnectionState;
+                if (PLCStatus == ConnectionStates.Online)
+                {
+                    bool ReadyStart = (txt_readyStart.Text == "1") ? true : false;
+                    Int16 messageNum = Int16.Parse(txt_messageNumber.Text.Trim());
+                    List<Tag> WriteMessage = new List<Tag>();
+                    WriteMessage.Add(new PLCSimenNetWrapper.Tag(VariablePLC.WriteMessage,(Int16) messageNum));
+                    WriteMessage.Add(new PLCSimenNetWrapper.Tag(VariablePLC.WriteReadyStart, ReadyStart));
+                    Plc.Instance.Write(VariablePLC.OKProduced, (Int16)32);
+                    Plc.Instance.Write(VariablePLC.NGProduced, (Int16)15);
+                    //  Plc.Instance.Write("DB181.DBW206", messageNum);
+                    Plc.Instance.Write(WriteMessage);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, ex.Source, ex.Message);
+            }
+        }
     }
 }
+

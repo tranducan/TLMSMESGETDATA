@@ -21,6 +21,13 @@ namespace TLMSMESGETDATA.PLC2
         public string PLC_Barcode { get; set; }
         public string STARTSTOP { get; set; }
         public DateTime DateTimeReset { get; set; }
+        public bool IsChecKQRCode { get; set; }
+        public bool IsReadyStart { get; set; }
+        public bool IsValidQRID { get; set; }
+        public bool IsValidQRMQC { get; set; }
+        public int numberCharQRMES { get; set; }
+        public int numberCharQRID { get; set; }
+        public string strQRMES { get; set; }
+        public string strQRID { get; set; }
     }
-    
 }

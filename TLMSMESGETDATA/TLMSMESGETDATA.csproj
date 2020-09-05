@@ -68,6 +68,7 @@
     </ApplicationDefinition>
     <Compile Include="Algorithm\LocalToServer.cs" />
     <Compile Include="Algorithm\SaveObject.cs" />
+    <Compile Include="Algorithm\SubFunction.cs" />
     <Compile Include="Algorithm\Uploaddata.cs" />
     <Compile Include="Algorithm\UploadLocalPLCDB.cs" />
     <Compile Include="Logfile\StartUpWindowcs.cs" />

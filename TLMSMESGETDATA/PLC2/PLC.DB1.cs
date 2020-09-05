@@ -23,6 +23,7 @@ namespace TLMSMESGETDATA.PLC2
         public DateTime DateTimeReset { get; set; }
         public bool IsChecKQRCode { get; set; }
         public bool IsReadyStart { get; set; }
+        public bool IsReset { get; set; }
         public bool IsValidQRID { get; set; }
         public bool IsValidQRMQC { get; set; }
         public int numberCharQRMES { get; set; }

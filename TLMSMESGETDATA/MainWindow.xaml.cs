@@ -175,87 +175,91 @@ namespace TLMSMESGETDATA
                             DataMQC MQCIPOld = keyValuePairsOld[machine.IP];
                             DataMQC mQCIP = new DataMQC();
                             mQCIP = GetDataMQCRealtime_QRMES(machine.IP, machine.Line, MQCIPOld);
-                            DisplayValueUI(machine.IP, mQCIP);
-                            if (mQCIP != null)
+                            if (mQCIP.strQRMES != null && mQCIP.strQRID != null)
                             {
-                                Uploaddata uploaddata = new Uploaddata();
-                                UploadLocalPLCDB uploadLocalPLCDB = new UploadLocalPLCDB();
+                                DisplayValueUI(machine.IP, mQCIP);
+                                Upload2Mes upload2Mes = new Upload2Mes();
 
-                                bool ischange = false;
-                                DataMQC mQCIPChanged = new DataMQC();
-                                mQCIPChanged = uploaddata.ChangeMQCData(MQCIPOld, mQCIP, out ischange);
-                                if (mQCIP.PLC_Barcode != null)
+                                if (mQCIP != null)
                                 {
+                                    Uploaddata uploaddata = new Uploaddata();
+                                    UploadLocalPLCDB uploadLocalPLCDB = new UploadLocalPLCDB();
 
-                                    if (mQCIP.PLC_Barcode.Contains("0010;B01;B01"))
+                                    bool ischange = false;
+                                    DataMQC mQCIPChanged = new DataMQC();
+                                    mQCIPChanged = uploaddata.ChangeMQCData(MQCIPOld, mQCIP, out ischange);
+                                    if (mQCIP.PLC_Barcode != null)
                                     {
+
+
                                         if (ischange)
                                         {
-                                            if (SettingClass.usingOfftlineServer)
-                                            {
-                                                DateTime FromDate = DateTime.Now;
-                                                var InsertLocal = uploadLocalPLCDB.InsertMQCUpdateRealtime(mQCIPChanged, machine.Line, false, SettingClass);
-                                                if (InsertLocal == false)
-                                                {
-                                                    SystemLog.Output(SystemLog.MSG_TYPE.War, "Insert local data fail", machine.Line);
-                                                }
-                                                else
-                                                {
-                                                    keyValuePairsOld[machine.IP] = mQCIP;
-                                                    DateTime ToDate = DateTime.Now;
-                                                    LocalToServer localToServer = new LocalToServer();
-                                                    var Result = localToServer.UploadLocalServertoFactoryDB(mQCIPChanged.PLC_Barcode, FromDate, ToDate, SettingClass);
-                                                    if (Result == false)
-                                                    {
-                                                        SystemLog.Output(SystemLog.MSG_TYPE.War, "insert to local data not success", machine.Line);
-                                                    }
-                                                }
+                                            upload2Mes.IsSendData2MES(mQCIPChanged, machine.Line);
 
-                                                //var InsertDb = uploaddata.InsertMQCUpdateRealtime(mQCIPChanged, machine.Line, false);
-                                                //if (InsertDb == false)
-                                                //{
-                                                //    SystemLog.Output(SystemLog.MSG_TYPE.War, "Insert remote data fail", machine.Line);
-                                                //}
-                                            }
-                                            else
-                                            {
-                                                var InsertDb = uploaddata.InsertMQCUpdateRealtime(mQCIPChanged, machine.Line, false);
-                                                if (InsertDb == false)
-                                                {
-                                                    SystemLog.Output(SystemLog.MSG_TYPE.War, "Insert remote data fail", machine.Line);
-                                                }
-                                                else
-                                                {
-                                                    keyValuePairsOld[machine.IP] = mQCIP;
-                                                }
-                                            }
 
+                                            //if (SettingClass.usingOfftlineServer)
+                                            //{
+                                            //    DateTime FromDate = DateTime.Now;
+                                            //    var InsertLocal = uploadLocalPLCDB.InsertMQCUpdateRealtime(mQCIPChanged, machine.Line, false, SettingClass);
+                                            //    if (InsertLocal == false)
+                                            //    {
+                                            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "Insert local data fail", machine.Line);
+                                            //    }
+                                            //    else
+                                            //    {
+                                            //        keyValuePairsOld[machine.IP] = mQCIP;
+                                            //        DateTime ToDate = DateTime.Now;
+                                            //        LocalToServer localToServer = new LocalToServer();
+                                            //        var Result = localToServer.UploadLocalServertoFactoryDB(mQCIPChanged.PLC_Barcode, FromDate, ToDate, SettingClass);
+                                            //        if (Result == false)
+                                            //        {
+                                            //            SystemLog.Output(SystemLog.MSG_TYPE.War, "insert to local data not success", machine.Line);
+                                            //        }
+                                            //    }
+
+
+                                            //}
+                                            //else
+                                            //{
+                                            //    var InsertDb = uploaddata.InsertMQCUpdateRealtime(mQCIPChanged, machine.Line, false);
+                                            //    if (InsertDb == false)
+                                            //    {
+                                            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "Insert remote data fail", machine.Line);
+                                            //    }
+                                            //    else
+                                            //    {
+                                            //        keyValuePairsOld[machine.IP] = mQCIP;
+                                            //    }
+
+
+
+
+                                            //var StockAvaiable = uploaddata.QuantityCanRun(mQCIPChanged.PLC_Barcode);
+                                            //if (StockAvaiable > 0)
+                                            //{
+
+
+                                            //    Plc.Instance.Write("DB151.DBW0", (uint)StockAvaiable);
+
+                                            //}
+                                            //else
+                                            //{
+                                            //    Plc.Instance.Write("DB151.DBW4", (uint)Math.Abs(StockAvaiable));
+                                            //}
                                         }
 
-                                        var StockAvaiable = uploaddata.QuantityCanRun(mQCIPChanged.PLC_Barcode);
-                                        if (StockAvaiable > 0)
-                                        {
 
-
-                                            Plc.Instance.Write("DB151.DBW0", (uint)StockAvaiable);
-
-                                        }
                                         else
                                         {
-                                            Plc.Instance.Write("DB151.DBW4", (uint)Math.Abs(StockAvaiable));
+                                            Plc.Instance.Write("DB151.DBW0", (uint)0);
+                                            SystemLog.Output(SystemLog.MSG_TYPE.War, "Line : " + machine.Line, "Barcode Wrong Format- Write stock available = 0 " + mQCIP.PLC_Barcode);
                                         }
-
                                     }
                                     else
                                     {
                                         Plc.Instance.Write("DB151.DBW0", (uint)0);
-                                        SystemLog.Output(SystemLog.MSG_TYPE.War, "Line : " + machine.Line, "Barcode Wrong Format- Write stock available = 0 " + mQCIP.PLC_Barcode);
+                                        SystemLog.Output(SystemLog.MSG_TYPE.War, "Line : " + machine.Line, "Barcode == null - Write stock available = 0 " + mQCIP.PLC_Barcode);
                                     }
-                                }
-                                else
-                                {
-                                    Plc.Instance.Write("DB151.DBW0", (uint)0);
-                                    SystemLog.Output(SystemLog.MSG_TYPE.War, "Line : " + machine.Line, "Barcode == null - Write stock available = 0 " + mQCIP.PLC_Barcode);
                                 }
                             }
                             else
@@ -294,7 +298,7 @@ namespace TLMSMESGETDATA
             machine.QR = data.strQRMES;
             machine.Lot = QRMEs.PO;
             machine.product = QRMEs.Product;
-            if (data.strQRID != null) ;
+            if (data.strQRID != null) 
             qRIDMES = QRSpilittoClass.QRstring2IDFormat(data.strQRID);
             machine.Inspector = qRIDMES.ID;
             machine.Output = data.Good_Products_Total;
@@ -366,18 +370,19 @@ namespace TLMSMESGETDATA
             //            mysqlMES.sqlExecuteNonQuery(stringBuilder.ToString(), false);
             //  QRSpilittoClass.QRstring2MQCFormat("s;B511-20040008;BMH1257060S05;PSC;5,000;18/06/2020;;202011;;21202020202020e");
             // QRSpilittoClass.QRstring2IDFormat("44Z9D075C2O1;TL-0079;Nguyễn Thị Bích Kiều;");
-            DataMQC dataMQC = new DataMQC();
-            dataMQC.strQRMES = "s;B511-20040008;BMH1257060S05;PSC;5,000;18/06/2020;;202011;;21202020202020e";
-            dataMQC.strQRID = "44Z9D075C2O1;TL-0079;Nguyễn Thị Bích Kiều;";
-            dataMQC.Good_Products_Total = 10;
-            dataMQC.NG_Products_NG_ = new int[32];
-            dataMQC.NG_Products_NG_[1] = 2;
-            dataMQC.NG_Products_Total = 2;
-            Upload2Mes upload2Mes = new Upload2Mes();
-            upload2Mes.IsSendData2MES(dataMQC, "test");
+            //DataMQC dataMQC = new DataMQC();
+            //dataMQC.strQRMES = "s;B511-20040008;BMH1257060S05;PSC;5,000;18/06/2020;;202011;;21202020202020e";
+            //dataMQC.strQRID = "44Z9D075C2O1;TL-0079;Nguyễn Thị Bích Kiều;";
+            //dataMQC.Good_Products_Total = 10;
+            //dataMQC.NG_Products_NG_ = new int[32];
+            //dataMQC.NG_Products_NG_[1] = 2;
+            //dataMQC.NG_Products_Total = 2;
+            //Upload2Mes upload2Mes = new Upload2Mes();
+            //upload2Mes.IsSendData2MES(dataMQC, "test");
            ListMachines = new List<MachineItem>();
             PLCData pLCData = new PLCData();
-           ListMachines = pLCData.GetIpMachineRuning();
+            ListMachines.Add(new MachineItem { IP = "172.16.1.145", Line = "L03", IsEnable = true });
+         //   ListMachines = pLCData.GetIpMachineRuning();
             ListBarcode = VariablePLC.barcodeaddress();
 
             tagsbarcode = new List<Tag>();
@@ -450,7 +455,7 @@ namespace TLMSMESGETDATA
             string str = string.Format("PLC To GMES: v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Build);
             notiftyBalloonTip(str, 1000);
 
-
+//            LoadDataMQCStarting(); 
             //  StartTimerGetPLCData();
 
 
@@ -661,7 +666,7 @@ namespace TLMSMESGETDATA
                                 dataMQC.IsReadyStart = (bool)ReadTags[1].ItemValue;
                             }
 
-                            if (dataMQC.IsReadyStart == true)
+                         //   if (dataMQC.IsReadyStart == false)
                             {
                                 TempTag = new List<Tag>();
                                 TempTag.Add(new Tag(VariablePLC.NumberCharMESQR, ""));
@@ -739,9 +744,11 @@ namespace TLMSMESGETDATA
 
                         keyValuePairsOld.Add(machine.IP, dataMQC);
 
-
+                        DisplayValueUI(machine.IP, dataMQC);
                     }
+                   
                     datagridMachines.ItemsSource = machineOperations;
+                  //  datagridMachines.ItemsSource = datagridMachines;
                 }
 
                 else
@@ -1176,13 +1183,18 @@ namespace TLMSMESGETDATA
                             {
                               
                                 dataMQC = new DataMQC();
-
+                                dataMQC.strQRMES = dataOld.strQRMES;
+                                dataMQC.strQRID = dataOld.strQRID;
+                                dataMQC.IsReadyStart = dataOld.IsReadyStart;
+                                dataMQC.IsReset = dataOld.IsReset;
+                                dataMQC.IsChecKQRCode = dataOld.IsChecKQRCode;
                                 dataMQC.PLC_Barcode = dataOld.strQRMES;
                                 dataMQC.Good_Products_Total = (ListTag[0].ItemValue.ToString() != null) ? double.Parse(ListTag[0].ItemValue.ToString()) : 0;
                                 dataMQC.NG_Products_Total = (ListTag[1].ItemValue.ToString() != null) ? double.Parse(ListTag[1].ItemValue.ToString()) : 0;
                                 dataMQC.RW_Products_Total = (ListTag[2].ItemValue.ToString() != null) ? double.Parse(ListTag[2].ItemValue.ToString()) : 0;
                                 dataMQC.STARTSTOP = (ListTag[3].ItemValue.ToString() != null) ? ListTag[3].ItemValue.ToString() : "";
                                 dataMQC.PLCConnection = Plc.Instance.ConnectionState.ToString();
+
                                 if (dataOld != null)
                                 {
                                     #region Running
@@ -1228,13 +1240,7 @@ namespace TLMSMESGETDATA
                                             }
 
                                         }
-                                        else
-                                        {
-                                            var barcode = Plc.Instance.ReadTagsToString(tagsbarcode);
-                                            dataMQC.PLC_Barcode = barcode;
-        
-                                            SystemLog.Output(SystemLog.MSG_TYPE.War, "Barcode is wrong format: IPMachine :", IP);
-                                        }
+                                      
 
 
                                         #endregion
@@ -1251,7 +1257,16 @@ namespace TLMSMESGETDATA
                         }
 
                     }
-                  
+                  else
+                    {
+                        dataMQC = dataPLC;
+                        dataMQC.strQRMES = dataOld.strQRMES;
+                        dataMQC.strQRID = dataOld.strQRID;
+                        dataMQC.Good_Products_Total = dataOld.Good_Products_Total;
+                        dataMQC.NG_Products_Total = dataOld.NG_Products_Total;
+                        dataMQC.RW_Products_Total = dataOld.RW_Products_Total;
+                    }
+                          
 
                     if(dataPLC.IsReset == true)
                     {

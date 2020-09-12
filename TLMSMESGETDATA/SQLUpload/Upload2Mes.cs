@@ -28,7 +28,7 @@ namespace TLMSMESGETDATA.SQLUpload
                 for (int i = 1; i < 39; i++)
                 {
                     if (dataMQC.RW_Products_NG_[i - 1] > 0)
-                        InsertRowDataMQC(dataMQC, dataMQC.NG_Products_NG_[i - 1].ToString(), line, "RW" + i.ToString());
+                        InsertRowDataMQC(dataMQC, dataMQC.RW_Products_NG_[i - 1].ToString(), line, "RW" + i.ToString());
                 }
             }
             catch (Exception ex)

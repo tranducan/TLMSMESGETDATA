@@ -62,7 +62,7 @@ namespace TLMSMESGETDATA.Algorithm
              
                
             }
-            return null;
+            return qRIDMES;
         }
     }
 public    class QRMQC_MES

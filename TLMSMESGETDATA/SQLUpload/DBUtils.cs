@@ -14,9 +14,9 @@ namespace TLMSMESGETDATA
         {
           
 
-            string datasource = "172.16.0.12";
+            string datasource = @"DESKTOP-83OVHRC\SQLEXPRESS";
             string database = "ERPSOFT";
-            string username = "ERPUSER";
+            string username = "SQLUSER";
             string password = "12345";
 
 

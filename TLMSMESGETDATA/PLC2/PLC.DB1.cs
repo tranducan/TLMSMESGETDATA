@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace TLMSMESGETDATA.PLC2
 {
-    class DataMQC
+  public  class DataMQC
     {
+        public string PLCConnection { get; set; }
         public double Good_Products_Total { get; set; }
         public double NG_Products_Total { get; set; }
 

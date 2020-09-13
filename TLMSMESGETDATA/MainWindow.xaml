@@ -73,13 +73,15 @@
         </StatusBar>
         <CheckBox x:Name="cb_GetFirstValues" Content="Is Get First Values " Margin="188,41,127.6,0" Height="15" VerticalAlignment="Top"/>
         <Label Content="QR ID" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="3" VerticalAlignment="Top" Width="80" Height="26"/>
-        <TextBox x:Name="txt_IDQR" Margin="120,10,39.6,0" Grid.Row="3" TextWrapping="Wrap" Height="26" VerticalAlignment="Top"/>
-        <Label Content="QR MESCODE" HorizontalAlignment="Left" Margin="10,57,0,0" Grid.Row="3" VerticalAlignment="Top" Width="105" Height="26"/>
-        <TextBox x:Name="txt_IDQRMES" Margin="120,57,39.6,0" Grid.Row="3" TextWrapping="Wrap" Height="26" VerticalAlignment="Top"/>
-        <Button x:Name="btn_GetValue" Content="Get value" Margin="380,10,39.6,10.4" Click="btn_GetValue_Click" RenderTransformOrigin="0.5,0.505"/>
+        <TextBox x:Name="txt_IDQR" Margin="106,10,74,0" Grid.Row="3" TextWrapping="Wrap" Height="26" VerticalAlignment="Top"/>
+        <Label Content="QR MESCODE" HorizontalAlignment="Left" Margin="0,57,0,0" Grid.Row="3" VerticalAlignment="Top" Width="90" Height="26"/>
+        <TextBox x:Name="txt_IDQRMES" Margin="105,57,74,0" Grid.Row="3" TextWrapping="Wrap" Height="26" VerticalAlignment="Top"/>
+        <Button x:Name="btn_GetValue" Content="Get value" Margin="392,10,40,10" Click="btn_GetValue_Click" RenderTransformOrigin="0.5,0.505"/>
         <Button Content="Write Data" HorizontalAlignment="Left" Margin="25,118,0,0" VerticalAlignment="Top" Width="75" Height="19" Grid.Row="3" Click="Button_Click"/>
         <TextBox x:Name="txt_readyStart" HorizontalAlignment="Left" Height="23" Margin="120,114,0,0" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
         <TextBox x:Name="txt_messageNumber" HorizontalAlignment="Left" Height="23" Margin="330,114,0,0" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnQRID" Content="readQRID" HorizontalAlignment="Left" Margin="431,10,0,0" Grid.Row="3" VerticalAlignment="Top" Width="48" Click="btnQRID_Click"/>
+        <Button x:Name="btnQRMES" Content="QR MES" HorizontalAlignment="Left" Margin="431,63,0,0" Grid.Row="3" VerticalAlignment="Top" Width="48" Click="btnQRMES_Click"/>
 
     </Grid>
 </Window>

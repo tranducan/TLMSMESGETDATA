@@ -457,7 +457,7 @@ namespace TLMSMESGETDATA
 
 //            LoadDataMQCStarting(); 
             //  StartTimerGetPLCData();
-
+          
 
 
 
@@ -1394,6 +1394,38 @@ namespace TLMSMESGETDATA
 
                 SystemLog.Output(SystemLog.MSG_TYPE.Err, ex.Source, ex.Message);
             }
+        }
+
+        private void btnQRID_Click(object sender, RoutedEventArgs e)
+        {
+            string IPTest = "172.16.1.145";
+            stopwatch = new Stopwatch();
+            stopwatch.Start();
+            Plc.Instance.Connect(IPTest, 3000);
+            var PLCStatus = Plc.Instance.ConnectionState;
+            if (PLCStatus == ConnectionStates.Online)
+            {
+                var strID = Plc.Instance.ReadStringFromByte(181,0, 99);
+                txt_IDQR.Text = strID;
+            }
+            stopwatch.Stop();
+            SystemLog.Output(SystemLog.MSG_TYPE.War, "tack-time", stopwatch.ElapsedMilliseconds.ToString());
+        }
+
+        private void btnQRMES_Click(object sender, RoutedEventArgs e)
+        {
+            string IPTest = "172.16.1.145";
+            stopwatch = new Stopwatch();
+            stopwatch.Start();
+            Plc.Instance.Connect(IPTest, 3000);
+            var PLCStatus = Plc.Instance.ConnectionState;
+            if (PLCStatus == ConnectionStates.Online)
+            {
+                var strID = Plc.Instance.ReadStringFromByte(181,100, 99);
+                txt_IDQRMES.Text = strID;
+            }
+            stopwatch.Stop();
+            SystemLog.Output(SystemLog.MSG_TYPE.War, "tack-time", stopwatch.ElapsedMilliseconds.ToString());
         }
     }
 }

@@ -189,6 +189,7 @@ namespace TLMSMESGETDATA.PLC2
                 return null;
             }
             List<Tag> tags = plcDriver.ReadItems(tagsinput);
+                
 
            //     var test = S7.Net.Conversion.ValToBinString(tags[0].ItemValue);
             foreach (var item in tags)
@@ -214,7 +215,15 @@ namespace TLMSMESGETDATA.PLC2
             }
             plcDriver.WriteItems(tags);
         }
-
+        public string ReadStringFromByte( int db, int StartAddress, int count)
+        {
+            if (plcDriver == null || plcDriver.ConnectionState != ConnectionStates.Online)
+            {
+                return "";
+            }
+            var strReturn = plcDriver.ReadString(DataType.Output, db, StartAddress, count);
+            return strReturn;
+        }
         #endregion        
 
         #region Private methods
@@ -226,18 +235,19 @@ namespace TLMSMESGETDATA.PLC2
             return valid;
         }
 
+        
         //private void RefreshTags()
         //{
         //    try
         //    {
 
-          
-        //    plcDriver.ReadClass(Db1, 2);
+
+        //        plcDriver.ReadClass(Db1, 2);
         //    }
         //    catch (Exception ex)
         //    {
 
-        //        SystemLog.Output(SystemLog.MSG_TYPE.Err, "RefreshTags()",ex.Message );
+        //        SystemLog.Output(SystemLog.MSG_TYPE.Err, "RefreshTags()", ex.Message);
 
         //    }
 

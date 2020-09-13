@@ -68,6 +68,7 @@ namespace PLCSimenNetWrapper
             {
                 Tag tag = new Tag(item.ItemName);
                 var result = client.Read(item.ItemName);
+                
                 if (result is ErrorCode && (ErrorCode)result != ErrorCode.NoError)
                 {
                     throw new Exception(((ErrorCode)result).ToString() + "\n" + "Tag: " + tag.ItemName);
@@ -119,7 +120,19 @@ namespace PLCSimenNetWrapper
         {
             client.WriteClass(sourceClass, db);
         }       
-
+        public string ReadString(DataType dataType, int db, int startByteAdr,int count)
+        {
+            string ReadStr = "";
+            if (this.ConnectionState != ConnectionStates.Online)
+            {
+                throw new Exception("Can't read, the client is disconnected.");
+            }
+            var byteArray = client.ReadBytes(DataType.Output, db, startByteAdr, count);
+            if (byteArray.Count() > 0)
+                ReadStr = S7.Net.Types.String.FromByteArray(byteArray);
+           
+            return ReadStr;
+        }
         #endregion
     }
 }

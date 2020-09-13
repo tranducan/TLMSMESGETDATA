@@ -1405,7 +1405,7 @@ namespace TLMSMESGETDATA
             var PLCStatus = Plc.Instance.ConnectionState;
             if (PLCStatus == ConnectionStates.Online)
             {
-                var strID = Plc.Instance.ReadStringFromByte(181,0, 99);
+                var strID = Plc.Instance.ReadStringFromByte(181,0, 99);//doc ma QR ID
                 txt_IDQR.Text = strID;
             }
             stopwatch.Stop();
@@ -1421,11 +1421,36 @@ namespace TLMSMESGETDATA
             var PLCStatus = Plc.Instance.ConnectionState;
             if (PLCStatus == ConnectionStates.Online)
             {
-                var strID = Plc.Instance.ReadStringFromByte(181,100, 99);
+                var strID = Plc.Instance.ReadStringFromByte(181,100, 99);// Doc ma QR MES
                 txt_IDQRMES.Text = strID;
             }
             stopwatch.Stop();
             SystemLog.Output(SystemLog.MSG_TYPE.War, "tack-time", stopwatch.ElapsedMilliseconds.ToString());
+        }
+
+        private void txt_NGlist_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string IPTest = "172.16.1.145";
+                stopwatch = new Stopwatch();
+                stopwatch.Start();
+                Plc.Instance.Connect(IPTest, 3000);
+                var PLCStatus = Plc.Instance.ConnectionState;
+                if (PLCStatus == ConnectionStates.Online)
+                {
+                    var NGList = Plc.Instance.ReadObject(3, 0, S7.Net.VarType.Word, 38);// doc 38 items NG neu OK thi doi DB thanh 4 de doc 38 items RW
+                    var Values = (int[])NGList;
+                }
+                stopwatch.Stop();
+                SystemLog.Output(SystemLog.MSG_TYPE.War, "tack-time", stopwatch.ElapsedMilliseconds.ToString());
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.War, "Error", ex.Message);
+            }
+        
         }
     }
 }

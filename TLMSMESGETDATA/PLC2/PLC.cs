@@ -224,6 +224,15 @@ namespace TLMSMESGETDATA.PLC2
             var strReturn = plcDriver.ReadString(DataType.Output, db, StartAddress, count);
             return strReturn;
         }
+        public Object ReadObject(int db, int StartAddress,VarType varType, int count)
+        {
+            if (plcDriver == null || plcDriver.ConnectionState != ConnectionStates.Online)
+            {
+                return null;
+            }
+            var objReturn = plcDriver.ReadObject(DataType.Output, db, StartAddress,varType, count);
+            return objReturn;
+        }
         #endregion        
 
         #region Private methods

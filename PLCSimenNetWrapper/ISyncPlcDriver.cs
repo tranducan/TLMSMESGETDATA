@@ -20,7 +20,7 @@ namespace PLCSimenNetWrapper
 
         void ReadClass(object sourceClass, int db);
         string ReadString(DataType dataType, int db, int startByteAdr, int count);
-
+        object ReadObject(DataType dataType, int db, int startByteAdr, VarType varType, int count);
         void WriteClass(object sourceClass, int db);      
        
         void WriteItems(List<Tag> itemList); 

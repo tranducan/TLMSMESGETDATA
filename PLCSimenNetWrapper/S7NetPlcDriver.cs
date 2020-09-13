@@ -130,8 +130,20 @@ namespace PLCSimenNetWrapper
             var byteArray = client.ReadBytes(DataType.Output, db, startByteAdr, count);
             if (byteArray.Count() > 0)
                 ReadStr = S7.Net.Types.String.FromByteArray(byteArray);
-           
+            
             return ReadStr;
+        }
+
+        public object ReadObject(DataType dataType, int db, int startByteAdr,VarType varType, int count)
+        {
+            if (this.ConnectionState != ConnectionStates.Online)
+            {
+                throw new Exception("Can't read, the client is disconnected.");
+            }
+            var returnObject = client.Read(dataType, db,startByteAdr, varType, count);
+            
+
+            return returnObject;
         }
         #endregion
     }

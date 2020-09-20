@@ -17,7 +17,7 @@ namespace TLMSMESGETDATA.Model
         public double Output { get; set; }
         public double NG { get; set; }
         public double Rework { get; set; }
-        public string ONOFF { get; set; }
+       
 
     }
 }

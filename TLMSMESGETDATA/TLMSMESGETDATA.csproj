@@ -50,6 +50,9 @@
     <Reference Include="S7.Net, Version=0.4.0.0, Culture=neutral, PublicKeyToken=d5812d469e84c693, processorArchitecture=MSIL">
       <HintPath>..\packages\S7netplus.0.4.0\lib\net452\S7.Net.dll</HintPath>
     </Reference>
+    <Reference Include="Sharp7, Version=1.1.75.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sharp7.1.1.75\lib\net40\Sharp7.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.5.0\lib\netstandard1.1\System.Buffers.dll</HintPath>
@@ -109,8 +112,10 @@
     <Compile Include="Logfile\StartUpWindowcs.cs" />
     <Compile Include="Logfile\SystemRecord.cs" />
     <Compile Include="Model\MachineDisplay.cs" />
+    <Compile Include="Model\MQCVariable.cs" />
     <Compile Include="Model\SettingClass.cs" />
     <Compile Include="PLC2\PLCData.cs" />
+    <Compile Include="Sharp7PLC\ReadVariablePLC.cs" />
     <Compile Include="SQLUpload\ClassMySqlConnect.cs" />
     <Compile Include="SQLUpload\DbMySQLConnect.cs" />
     <Compile Include="SQLUpload\DBSQLServerUtils.cs" />
@@ -122,6 +127,7 @@
     <Compile Include="SQLUpload\sqlCON.cs" />
     <Compile Include="SQLUpload\sqlERPCON.cs" />
     <Compile Include="SQLUpload\SQLERPTarget.cs" />
+    <Compile Include="SQLUpload\SQLQRUpdate.cs" />
     <Compile Include="SQLUpload\sqlSFT.cs" />
     <Compile Include="SQLUpload\Upload2Mes.cs" />
     <Compile Include="View\ConfigureWindow.xaml.cs">

@@ -15,18 +15,18 @@
             <RowDefinition Height="62*"/>
             <RowDefinition Height="3*"/>
             <RowDefinition Height="62*"/>
-            <RowDefinition Height="162*"/>
-            <RowDefinition Height="120*"/>
+            <RowDefinition Height="109*"/>
+            <RowDefinition Height="173*"/>
             <RowDefinition Height="22*"/>
         </Grid.RowDefinitions>
-        <RichTextBox x:Name="richTextBox" Grid.Column="1" Margin="18.4,1.4,9.6,9" Grid.Row="2" Grid.RowSpan="4" Background="#FF292323">
+        <RichTextBox x:Name="richTextBox" Grid.Column="1" Margin="18.4,0.4,-0.4,8" Grid.Row="2" Grid.RowSpan="4" Background="#FF292323">
             <FlowDocument>
                 <Paragraph>
                     <Run Text="RichTextBox"/>
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
-        <DataGrid x:Name="datagridMachines" Margin="0,11.4,9.6,3.6" Grid.Row="4" CanUserAddRows="False" IsReadOnly="True"/>
+        <DataGrid x:Name="datagridMachines" Margin="0,6.2,9.6,2.6" Grid.Row="4" CanUserAddRows="False" IsReadOnly="True"/>
         <Label Content="GET DATA TO MES" Grid.Column="1" Margin="8.4,-18,-0.4,0.4" FontSize="48" VerticalAlignment="Bottom" Foreground="#FFCAE727" Height="80" FontWeight="Bold">
             <Label.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -57,7 +57,7 @@
         </Label>
         <Button x:Name="btn_connect" Content="Start" Margin="10,10,0,10.4" HorizontalAlignment="Left" Width="70" Click="Btn_test_Click"/>
         <Button x:Name="btn_disconnect" Content="Stop" Margin="85,10,0,10.4" HorizontalAlignment="Left" Width="70" Click="Btn_disconnect_Click" IsEnabled="False"/>
-        <StatusBar HorizontalAlignment="Left" Margin="0,2.4,0,-2" Grid.Row="5" Width="320">
+        <StatusBar HorizontalAlignment="Left" Margin="0,3.4,0,-3" Grid.Row="5" Width="320">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Connection state: "/>
@@ -67,24 +67,15 @@
             <Separator/>
             <StatusBarItem Margin="0,0,0,0.2">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="lblReadTime" Width="206" Height="24"/>
+                    <TextBlock x:Name="lblReadTime" Width="206" Height="20"/>
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>
         <CheckBox x:Name="cb_GetFirstValues" Content="Is Get First Values " Margin="188,41,127.6,0" Height="15" VerticalAlignment="Top"/>
-        <Label Content="QR ID" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="3" VerticalAlignment="Top" Width="80" Height="26"/>
-        <TextBox x:Name="txt_IDQR" Margin="106,10,74,0" Grid.Row="3" TextWrapping="Wrap" Height="26" VerticalAlignment="Top"/>
-        <Label Content="QR MESCODE" HorizontalAlignment="Left" Margin="0,57,0,0" Grid.Row="3" VerticalAlignment="Top" Width="90" Height="26"/>
-        <TextBox x:Name="txt_IDQRMES" Margin="105,57,74,0" Grid.Row="3" TextWrapping="Wrap" Height="26" VerticalAlignment="Top"/>
-        <Button x:Name="btn_GetValue" Content="Get value" Margin="392,10,40,10" Click="btn_GetValue_Click" RenderTransformOrigin="0.5,0.505"/>
-        <Button Content="Write Data" HorizontalAlignment="Left" Margin="25,137,0,0" VerticalAlignment="Top" Width="75" Height="19" Grid.Row="3" Click="Button_Click"/>
-        <TextBox x:Name="txt_readyStart" HorizontalAlignment="Left" Height="23" Margin="120,133,0,0" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="txt_messageNumber" HorizontalAlignment="Left" Height="23" Margin="330,133,0,0" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-        <Button x:Name="btnQRID" Content="readQRID" HorizontalAlignment="Left" Margin="431,10,0,0" Grid.Row="3" VerticalAlignment="Top" Width="48" Click="btnQRID_Click"/>
-        <Button x:Name="btnQRMES" Content="QR MES" HorizontalAlignment="Left" Margin="431,63,0,0" Grid.Row="3" VerticalAlignment="Top" Width="48" Click="btnQRMES_Click"/>
-        <Label Content="Get NG list" HorizontalAlignment="Left" Margin="0,88,0,0" Grid.Row="3" VerticalAlignment="Top" Width="90" Height="26"/>
-        <TextBox x:Name="txt_IDQRMES_Copy" Margin="105,88,73.6,0" Grid.Row="3" TextWrapping="Wrap" Height="26" VerticalAlignment="Top"/>
-        <Button x:Name="txt_NGlist" Content="NG list" HorizontalAlignment="Left" Margin="432,91,0,0" Grid.Row="3" VerticalAlignment="Top" Width="48" Click="txt_NGlist_Click"/>
+        <Button x:Name="btn_GetValue" Content="Get value" Margin="396,10,35.6,10.4" Click="btn_GetValue_Click" RenderTransformOrigin="0.5,0.505"/>
+        <Button Content="Write Data" HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" Width="75" Height="19" Grid.Row="3" Click="Button_Click"/>
+        <TextBox x:Name="txt_readyStart" HorizontalAlignment="Left" Height="23" Margin="111,33,0,0" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="txt_messageNumber" Height="23" Margin="275,33,94.6,0" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

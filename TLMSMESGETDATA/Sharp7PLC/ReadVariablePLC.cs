@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -217,16 +218,18 @@ namespace TLMSMESGETDATA.Sharp
             try
             {
                 S7MultiVar Reader = new S7MultiVar(Client);
-                Reader.Add((int)S7Area.DB, (int)S7WordLength.Bit, 7, 2048, 1, ref DB_A);
-                Reader.Add((int)S7Area.DB, (int)S7WordLength.Bit, 181, 208, 1, ref DB_B);
-                Reader.Add((int)S7Area.DB, (int)S7WordLength.Bit, 9, 2, 1, ref DB_C);
-                Reader.Add((int)S7Area.DB, (int)S7WordLength.Bit, 181, 2, 1, ref DB_D);
+                Reader.Add((int)S7Area.DB, (int)S7WordLength.Byte, 7, 2048, 1, ref DB_A);
+                Reader.Add((int)S7Area.DB, (int)S7WordLength.Byte, 181, 208, 1, ref DB_B);
+                //Client.ReadArea(S7Area.DB, 181, 204, 1, S7WordLength.Byte, Buffer);
+                Reader.Add((int)S7Area.DB, (int)S7WordLength.Byte, 9, 0, 1, ref DB_C);
+                Reader.Add((int)S7Area.DB, (int)S7WordLength.Byte, 181, 204, 1, ref DB_D);
                 var Result = Reader.Read();
-                keyValuePairs[PLC2.VariablePLC.FlagKT] = Sharp7.S7.GetBitAt(DB_A, 0, 1);
-                keyValuePairs[PLC2.VariablePLC.IsReset] = Sharp7.S7.GetBitAt(DB_B, 0, 1);
-                keyValuePairs[PLC2.VariablePLC.OnOFF] = Sharp7.S7.GetBitAt(DB_C, 2, 1);
-                keyValuePairs[PLC2.VariablePLC.WriteReadyStart] = Sharp7.S7.GetBitAt(DB_D, 0, 1);
+                keyValuePairs[PLC2.VariablePLC.FlagKT] = Sharp7.S7.GetBitAt(DB_A, 0, 0);
+                keyValuePairs[PLC2.VariablePLC.IsReset] = Sharp7.S7.GetBitAt(DB_B, 0, 0);
+                keyValuePairs[PLC2.VariablePLC.OnOFF] = Sharp7.S7.GetBitAt(DB_C, 0, 2);
+                keyValuePairs[PLC2.VariablePLC.WriteReadyStart] = Sharp7.S7.GetBitAt(DB_D, 0, 0);
 
+               
                 return keyValuePairs;
 
             }

@@ -17,7 +17,7 @@ namespace TLMSMESGETDATA.Algorithm
             QRMQC_MES qRMQC_MES = new QRMQC_MES();
             if(QRstr.Length > 0)
             {
-                if(QRstr.Substring(0,1)=="s" && QRstr.Substring((QRstr.Length-1),1)== "e")
+              //  if(QRstr.Substring(0,1)=="s" && QRstr.Substring((QRstr.Length-1),1)== "e")
                 {
                     var QRArray = QRstr.Substring(1, QRstr.Length - 2).Split(';');
                     if(QRArray.Count() == 10)

@@ -14,11 +14,11 @@ namespace TLMSMESGETDATA
         {
           
 
-            string datasource = @"DESKTOP-83OVHRC\SQLEXPRESS";
+           
+            string datasource = "172.16.0.12";
             string database = "ERPSOFT";
-            string username = "SQLUSER";
+            string username = "ERPUSER";
             string password = "12345";
-
 
 
             return DBSQLServerUtils.GetDBConnection(datasource, database, username, password);

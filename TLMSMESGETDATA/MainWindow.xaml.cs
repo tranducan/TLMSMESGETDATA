@@ -180,7 +180,7 @@ namespace TLMSMESGETDATA
                                 List<string> listChanged = new List<string>();
                                 MQCVariable mQCChanged = GetMQCVariableDisCrepancy(mQCPLC, mQCOld, ref isChanged, ref listChanged);
 
-                                UploadPLCtoDatabase(mQCChanged, listChanged, machine.Line);
+                            //    UploadPLCtoDatabase(mQCChanged, listChanged, machine.Line);
                                 DicMQCVariableIP[machine.IP] = mQCPLC;
                                 QRMQC_MES qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(mQCPLC.QRMES);
                                 QRIDMES qRIDMES = QRSpilittoClass.QRstring2IDFormat(mQCPLC.QRID);

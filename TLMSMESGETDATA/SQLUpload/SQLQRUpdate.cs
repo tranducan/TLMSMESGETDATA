@@ -33,6 +33,10 @@ namespace TLMSMESGETDATA.SQLUpload
         }
        public void UpdateOrInsertQRRecordTable(Model.MQCVariable qCVariable,  string line)
         {
+            try
+            {
+
+        
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append("begin tran");
             stringBuilder.Append(" declare @QRMES varchar(100) set @QRMES = '" + qCVariable.QRMES + "' ");
@@ -57,6 +61,16 @@ namespace TLMSMESGETDATA.SQLUpload
 	select * from m_MQCQR_Record where QR = @QRMES ");
 
             stringBuilder.Append(" commit ");
+
+            sqlCON sqlCON = new sqlCON();
+            sqlCON.sqlExecuteNonQuery(stringBuilder.ToString(), false);
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "UpdateOrInsertQRRecordTable", ex.Message);
+            }
+
         }
     }
 }

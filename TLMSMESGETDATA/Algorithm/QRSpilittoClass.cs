@@ -17,27 +17,28 @@ namespace TLMSMESGETDATA.Algorithm
             QRMQC_MES qRMQC_MES = new QRMQC_MES();
             if(QRstr.Length > 0)
             {
-              //  if(QRstr.Substring(0,1)=="s" && QRstr.Substring((QRstr.Length-1),1)== "e")
+                QRstr = QRstr.Trim();
+                if(QRstr.Substring(0,1)=="s" && QRstr.Substring((QRstr.Length-1),1)== "e")
                 {
                     var QRArray = QRstr.Substring(1, QRstr.Length - 2).Split(';');
                     if(QRArray.Count() == 10)
                     {
-                        qRMQC_MES.PO = QRArray[1];
-                        qRMQC_MES.Product = QRArray[2];
-                        qRMQC_MES.Unit = QRArray[3];
+                        qRMQC_MES.PO = QRArray[2];
+                        qRMQC_MES.Product = QRArray[3];
+                      //  qRMQC_MES.Unit = QRArray[4];
                         qRMQC_MES.quantity = int.Parse(QRArray[4],NumberStyles.AllowThousands);
                         qRMQC_MES.dateTime = QRArray[5];
                         qRMQC_MES.str1 = QRArray[6];
                         qRMQC_MES.str2 = QRArray[7];
                         qRMQC_MES.str3 = QRArray[8];
                         qRMQC_MES.str4 = QRArray[9];
-                        return qRMQC_MES;
+                      
                     }
 
                 }
                
             }
-            return null;
+            return qRMQC_MES;
         }
 
         /// <summary>

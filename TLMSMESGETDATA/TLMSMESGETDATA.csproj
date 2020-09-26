@@ -130,6 +130,7 @@
     <Compile Include="SQLUpload\SQLQRUpdate.cs" />
     <Compile Include="SQLUpload\sqlSFT.cs" />
     <Compile Include="SQLUpload\Upload2Mes.cs" />
+    <Compile Include="SQLUpload\Upload2MESMySQL.cs" />
     <Compile Include="View\ConfigureWindow.xaml.cs">
       <DependentUpon>ConfigureWindow.xaml</DependentUpon>
     </Compile>

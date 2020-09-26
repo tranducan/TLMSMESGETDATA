@@ -155,23 +155,23 @@ namespace TLMSMESGETDATA.Sharp
             return listQuantity;
 
         }
-        public void WriteMQCProducedQuantitytoPLC(int OutputQty, int NGQty, int RWQty)
+        public void WriteMQCProducedQuantitytoPLC(Int16 OutputQty, Int16 NGQty, Int16 RWQty)
         {
             try
             {
 
-         
-            byte[] BufferOP = new byte[2];
-            byte[]  BufferNG = new byte[2];
-            byte[]  BufferRW = new byte[2];
-           
-            Sharp7.S7.SetDIntAt(BufferOP, 0, OutputQty);
-            Sharp7.S7.SetDIntAt(BufferNG, 0, NGQty);
-            Sharp7.S7.SetDIntAt(BufferRW, 0, RWQty);
-            int Result;
-            Result = Client.DBWrite(6, 4, 2, BufferOP);
-            Result = Client.DBWrite(6, 6, 2, BufferNG);
-            Result = Client.DBWrite(6, 8, 2, BufferRW);
+
+                byte[] BufferOP = new byte[2];
+                byte[] BufferNG = new byte[2];
+                byte[] BufferRW = new byte[2];
+
+                Sharp7.S7.SetWordAt(BufferOP, 0,ushort.Parse( OutputQty.ToString()));
+                Sharp7.S7.SetWordAt(BufferNG, 0, ushort.Parse(NGQty.ToString()));
+                Sharp7.S7.SetWordAt(BufferRW, 0,ushort.Parse( RWQty.ToString()));
+                int Result;
+                Result = Client.WriteArea(S7Area.DB, 181, 210, 2, S7WordLength.Byte, BufferOP);
+                Result = Client.WriteArea(S7Area.DB, 181, 212, 2, S7WordLength.Byte, BufferNG);
+                Result = Client.WriteArea(S7Area.DB, 181, 214, 2, S7WordLength.Byte, BufferRW);
             }
             catch (Exception ex)
             {
@@ -199,8 +199,8 @@ namespace TLMSMESGETDATA.Sharp
             try
             {
                 byte[] buffer = new byte[2];
-                Sharp7.S7.SetDIntAt(buffer, 0,  value);
-                Client.DBWrite(db, start, size, buffer);
+                Sharp7.S7.SetWordAt(buffer, 0, ushort.Parse(value.ToString()));
+                Client.WriteArea(S7Area.DB, db, start, 2, S7WordLength.Byte, buffer);
             }
             catch (Exception ex)
             {

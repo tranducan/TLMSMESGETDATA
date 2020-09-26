@@ -3,51 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TLMSMESGETDATA.PLC2;
 using TLMSMESGETDATA.Algorithm;
-
-
+using TLMSMESGETDATA.Model;
 
 namespace TLMSMESGETDATA.SQLUpload
 {
-  public   class Upload2Mes
+ public   class Upload2MESMySQL
     {
-        public bool IsSendData2MES(Model.MQCVariable mQCVariable, string line)
-        {
-            try
-            {
-                if (mQCVariable.ListMQCQty[0] > 0)
-                    InsertRowMQVariables(mQCVariable, mQCVariable.ListMQCQty[0].ToString(), line, "OUTPUT");
-
-                if (mQCVariable.ListMQCQty[1] > 0)
-                {
-                    for (int i = 0; i < 38; i++)
-                    {
-                        if (mQCVariable.ListNG38[i] > 0)
-                            InsertRowMQVariables(mQCVariable, mQCVariable.ListNG38[i].ToString(), line, "NG" + (i + 1).ToString());
-
-                    }
-                }
-
-                if (mQCVariable.ListMQCQty[2] > 0)
-                {
-                    for (int i = 0; i < 38; i++)
-                    {
-                        if (mQCVariable.ListRW38[i] > 0)
-                            InsertRowMQVariables(mQCVariable, mQCVariable.ListRW38[i].ToString(), line, "RW" + (i + 1).ToString());
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-
-                SystemLog.Output(SystemLog.MSG_TYPE.Err, "IsSendData2MES(DataMQC dataMQC, string line, string IP)", ex.Message);
-            }
-
-            return false;
-        }
-
         public bool InsertRowMQVariables(Model.MQCVariable mQCVariable, string data, string line, string item)
         {
             try
@@ -76,10 +38,10 @@ namespace TLMSMESGETDATA.SQLUpload
                 // string model = GetModelFromLot(lot,setting);
                 string model = qRMQC_MES.Product;// lay model tren server, neu ko lay dc thi lay o local
 
-                sqlQuerry += "insert into t_mqc_realtime (serno, lot, model, site, factory, line, process,item,inspectdate,inspecttime, data, judge,status,remark,inspector,TL01 ) values( '";
+                sqlQuerry += "insert into t_mqc_realtime (serno, lot, model, site, factory, line, process,item,inspectdate,inspecttime, data, judge,status,remark,inspector ) values( '";
                 sqlQuerry += serno + "', '" + qRMQC_MES.PO + "', '" + model + "', '" + site + "', '" + factory + "', '" + line +
-               "', '" + process + "', '" + item + "', '" + date_ + "', '" + time_ + "', '" + data + "', '" + "" + "', '" + status + "', '" + Remark + "' , '" + qRIDMES.ID + "', '" + qRIDMES.FullName + "' )";
-                MysqlMES mysqlMES= new MysqlMES();
+               "', '" + process + "', '" + item + "', '" + date_ + "', '" + time_ + "', '" + data + "', '" + "" + "', '" + status + "', '" + Remark + "' , '" + qRIDMES.ID + "' )";
+                MysqlMES mysqlMES = new MysqlMES();
                 return mysqlMES.sqlExecuteNonQuery(sqlQuerry, false);
             }
             catch (Exception ex)
@@ -89,5 +51,8 @@ namespace TLMSMESGETDATA.SQLUpload
             }
 
         }
+    
+    
+    
     }
 }

@@ -15,9 +15,9 @@ namespace TLMSMESGETDATA
           
 
            
-            string datasource = "172.16.0.12";
-            string database = "ERPSOFT";
-            string username = "ERPUSER";
+            string datasource = @"172.16.1.222\LOCALSQL";
+            string database = "MQCMES";
+            string username = "Automation";
             string password = "12345";
 
 

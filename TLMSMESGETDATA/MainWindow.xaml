@@ -8,30 +8,30 @@
         Title="MainWindow" Height="461.3" Width="968.2" Loaded="Window_Loaded" Closing="Window_Closing" Closed="Window_Closed" Icon="pack://siteoforigin:,,,/Resources/machine.ico">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="245*"/>
-            <ColumnDefinition Width="236*"/>
+            <ColumnDefinition Width="497*"/>
+            <ColumnDefinition Width="465*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="62*"/>
             <RowDefinition Height="3*"/>
-            <RowDefinition Height="62*"/>
-            <RowDefinition Height="109*"/>
-            <RowDefinition Height="173*"/>
-            <RowDefinition Height="22*"/>
+            <RowDefinition Height="85*"/>
+            <RowDefinition/>
+            <RowDefinition Height="249*"/>
+            <RowDefinition Height="32*"/>
         </Grid.RowDefinitions>
-        <RichTextBox x:Name="richTextBox" Grid.Column="1" Margin="18.4,0.4,-0.4,8" Grid.Row="2" Grid.RowSpan="4" Background="#FF292323">
+        <RichTextBox x:Name="richTextBox" Grid.Column="1" Margin="19.2,0.4,-0.4,7" Grid.Row="2" Grid.RowSpan="4" Background="#FF292323">
             <FlowDocument>
                 <Paragraph>
                     <Run Text="RichTextBox"/>
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
-        <DataGrid x:Name="datagridMachines" Margin="0,6.2,9.6,2.6" Grid.Row="4" CanUserAddRows="False" IsReadOnly="True"/>
-        <Label Content="GET DATA TO MES" Grid.Column="1" Margin="8.4,-18,-0.4,0.4" FontSize="48" VerticalAlignment="Bottom" Foreground="#FFCAE727" Height="80" FontWeight="Bold">
+        <DataGrid x:Name="datagridMachines" Margin="0,5.8,8.8,2" Grid.Row="4" CanUserAddRows="False" IsReadOnly="True"/>
+        <Label Content="GET DATA TO MES" Grid.Column="1" Margin="9.2,-18,-0.4,0.4" FontSize="48" VerticalAlignment="Bottom" Foreground="#FFCAE727" Height="80" FontWeight="Bold">
             <Label.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="Black" Offset="0"/>
-                    <GradientStop Color="#FF67F9F1" Offset="0.457"/>
+                    <GradientStop Color="#FFE58238" Offset="0.457"/>
                 </LinearGradientBrush>
             </Label.Background>
             <Label.BorderBrush>
@@ -41,11 +41,11 @@
                 </LinearGradientBrush>
             </Label.BorderBrush>
         </Label>
-        <Label Content="machines" FontSize="48" Foreground="#FFEEB82D" FontWeight="Bold" Margin="0,1.4,2.6,0" VerticalAlignment="Center" Height="61" Grid.Row="2">
+        <Label Content="MACHINES" FontSize="48" Foreground="#FFCAE727" FontWeight="Bold" Margin="0,7.4,1.8,4.4" VerticalAlignment="Center" Height="73" Grid.Row="2">
             <Label.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="Black" Offset="0"/>
-                    <GradientStop Color="#FF67F9F1" Offset="0.457"/>
+                    <GradientStop Color="#FFDD835E" Offset="0.457"/>
                 </LinearGradientBrush>
             </Label.Background>
             <Label.BorderBrush>
@@ -57,8 +57,8 @@
         </Label>
         <Button x:Name="btn_connect" Content="Start" Margin="10,10,0,10.4" HorizontalAlignment="Left" Width="70" Click="Btn_test_Click"/>
         <Button x:Name="btn_disconnect" Content="Stop" Margin="85,10,0,10.4" HorizontalAlignment="Left" Width="70" Click="Btn_disconnect_Click" IsEnabled="False"/>
-        <StatusBar HorizontalAlignment="Left" Margin="0,3.4,0,-3" Grid.Row="5" Width="320">
-            <StatusBarItem>
+        <StatusBar HorizontalAlignment="Left" Margin="0,4,0,-4" Grid.Row="5" Width="320">
+            <StatusBarItem Margin="0,-4,0,3.6">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Connection state: "/>
                     <TextBlock x:Name="lblConnectionState"/>
@@ -71,8 +71,7 @@
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>
-        <CheckBox x:Name="cb_GetFirstValues" Content="Is Get First Values " Margin="188,31,127.6,0" Height="15" VerticalAlignment="Top"/>
-        <Button x:Name="btn_GetValue" Content="Get value" Margin="396,10,35.6,10.4" Click="btn_GetValue_Click" RenderTransformOrigin="0.503,0.505"/>
+        <Button x:Name="btn_GetValue" Content="Get value" Margin="396,10,34.8,10.4" Click="btn_GetValue_Click" RenderTransformOrigin="0.503,0.505"/>
 
     </Grid>
 </Window>

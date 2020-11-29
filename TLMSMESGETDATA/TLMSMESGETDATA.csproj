@@ -7,7 +7,7 @@
     <ProjectGuid>{559F9A24-E3C4-4513-B8E9-ECABA12D8674}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>TLMSMESGETDATA</RootNamespace>
-    <AssemblyName>TLMSMESGETDATA_test</AssemblyName>
+    <AssemblyName>TLMSMESGETDATA_V2</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -120,7 +120,6 @@
     <Compile Include="SQLUpload\DBUtilsMySQL.cs" />
     <Compile Include="SQLUpload\ExportListProduct.cs" />
     <Compile Include="SQLUpload\LocalPLCSql.cs" />
-    <Compile Include="SQLUpload\MQCversionApply.cs" />
     <Compile Include="SQLUpload\MysqlMES.cs" />
     <Compile Include="SQLUpload\sqlCON.cs" />
     <Compile Include="SQLUpload\sqlERPCON.cs" />

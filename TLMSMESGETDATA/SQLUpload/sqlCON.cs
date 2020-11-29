@@ -12,7 +12,7 @@ namespace TLMSMESGETDATA
 {
     public class sqlCON
     {
-        public SqlConnection conn = DBUtils.GetDBConnection(); //get from user database
+        public SqlConnection conn = DBUtils.GetDBConnection(MainWindow.SettingClass); //get from user database
 
         public string sqlExecuteScalarString(string sql)
         {

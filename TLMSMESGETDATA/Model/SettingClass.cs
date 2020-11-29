@@ -9,6 +9,7 @@ namespace TLMSMESGETDATA.Model
     [Serializable]
 public    class SettingClass
     {
+     
         public string OfflineServer { get; set; }
         public string userOffline { get; set; }
         public string password { get; set; }

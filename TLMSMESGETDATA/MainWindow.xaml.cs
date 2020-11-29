@@ -67,7 +67,7 @@ namespace TLMSMESGETDATA
     
         System.Windows.Forms.NotifyIcon m_notify = null;
         int CountRefresh = 0;
-        SettingClass SettingClass = new SettingClass();
+  public static      SettingClass SettingClass = new SettingClass();
 
         public MainWindow()
         {
@@ -158,12 +158,17 @@ namespace TLMSMESGETDATA
                     //MachineItem machine = new MachineItem();
                     //machine.IP = "172.16.1.145";
                     //machine.Line = "L03";
-                   foreach (var machine in ListMachines)
+                    LoadAdress();//load list PLC machine
+                    foreach (var machine in ListMachines)
                     {
                         try
                         {
                             //     machine.IP = 
-                            MQCVariable mQCOld = DicMQCVariableIP[machine.IP];
+                            MQCVariable mQCOld = new MQCVariable();
+                            if (DicMQCVariableIP.ContainsKey(machine.IP))
+                                 mQCOld = DicMQCVariableIP[machine.IP];
+                        
+
                             MQCVariable mQCPLC = GetMQCVariableRealtime(machine.IP, mQCOld);
                             MQCVariable mQCChanged = new MQCVariable();
                             if (mQCPLC.Connection == 0)
@@ -173,7 +178,12 @@ namespace TLMSMESGETDATA
                                 //   if (mQCPLC.DicSPLCtatus[VariablePLC.FlagKT] == true)
                                 {
                                     mQCChanged = GetMQCVariableDisCrepancy(mQCPLC, mQCOld, ref isChanged, ref listChanged);
+                                    if(DicMQCVariableIP.ContainsKey(machine.IP))
                                     DicMQCVariableIP[machine.IP] = mQCPLC;
+                                    else
+                                    {
+                                        DicMQCVariableIP.Add(machine.IP, mQCPLC);
+                                    }
                                     if (listChanged.Contains("Reset"))
                                     {
                                         //MachineOperation operation = new MachineOperation();
@@ -246,6 +256,7 @@ namespace TLMSMESGETDATA
                             {
                                 MachineOperation operation = new MachineOperation();
                                 operation.IP = machine.IP;
+                                operation.Line = machine.Line;
                                 Sharp7.S7Client client = new Sharp7.S7Client();
                                 operation.Status = client.ErrorText(mQCPLC.Connection);
                                 machineOperations.Add(operation);
@@ -315,6 +326,7 @@ namespace TLMSMESGETDATA
             MQCVariable qCVariableChanged = new MQCVariable();
             qCVariableChanged.QRMES = mQCOld.QRMES;
             qCVariableChanged.QRID = mQCOld.QRID;
+            
             try
             {
                 if (mQCPLC.DicSPLCtatus[VariablePLC.IsReset] != mQCOld.DicSPLCtatus[VariablePLC.IsReset])
@@ -451,7 +463,7 @@ namespace TLMSMESGETDATA
                 //EventBroker.AddTimeEvent(EventBroker.EventID.etUpdateMe, m_timerEvent, 20000, true);//66분에 한번씩
             }
             LoadBackgroundWorker();
-            LoadAdress();
+           // LoadAdress();
             System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu();
 
             System.Windows.Forms.MenuItem itemConfig = new System.Windows.Forms.MenuItem();
@@ -494,9 +506,18 @@ namespace TLMSMESGETDATA
         private void ItemConfig_Click(object sender, EventArgs e)
         {
             View.ConfigureWindow configureWindow = new View.ConfigureWindow();
+            configureWindow.Closed += ConfigureWindow_Closed;
             configureWindow.Show();
 
         }
+
+        private void ConfigureWindow_Closed(object sender, EventArgs e)
+        {
+            if (System.IO.File.Exists(SaveObject.Pathsave))
+                SettingClass = (SettingClass)SaveObject.Load_data(SaveObject.Pathsave);
+
+        }
+
         private void notiftyBalloonTip(string message, int showTime, string title = null)
         {
             if (m_notify == null)
@@ -618,12 +639,15 @@ namespace TLMSMESGETDATA
                 btn_disconnect.Content = "Stop";
                 btn_connect.IsEnabled = false;
                 btn_disconnect.IsEnabled = true;
+              
                 if(System.IO.File.Exists(SaveObject.Pathsave))
                 SettingClass = (SettingClass)SaveObject.Load_data(SaveObject.Pathsave);
+                if (SettingClass == null)
+                    SettingClass = new SettingClass();
                 if (SettingClass.PLCTimeOut == 0)
-                    SettingClass.PLCTimeOut = 3000;
+                    SettingClass.PLCTimeOut = 2000;
                 if (SettingClass.timmer == 0)
-                    SettingClass.timmer = 30000;
+                    SettingClass.timmer = 10000;
                 LoadDataMQCStarting();
                 tmrCallBgWorker.Interval = SettingClass.timmer > 0 ? SettingClass.timmer : 500;
                 tmrCallBgWorker.Start();
@@ -665,6 +689,7 @@ namespace TLMSMESGETDATA
             try
             {
                 stopwatch.Start();
+                LoadAdress();
                 if (ListMachines.Count > 0)
                 {
                     DicMQCVariableIP = new Dictionary<string, MQCVariable>();

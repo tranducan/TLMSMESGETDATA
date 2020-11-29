@@ -34,9 +34,9 @@ namespace TLMSMESGETDATA.View
             SettingClass.OfflineServer = txt_serverOffline.Text.Trim();
             SettingClass.userOffline = txt_userOffline.Text.Trim();
             SettingClass.password = passwordBox.Password;
-            SettingClass.usingOfftlineServer =(bool) cb_serveroffline.IsChecked;
+          
             SettingClass.IsStartupWindow = (bool)cb_StartupWindow.IsChecked;
-            SettingClass.PathListProduct = txt_listproductPath.Text.Trim();
+         
            
             try
             {
@@ -72,14 +72,18 @@ namespace TLMSMESGETDATA.View
             {
                 SettingClass = new Model.SettingClass();
                 SettingClass = (Model.SettingClass)Algorithm.SaveObject.Load_data(Algorithm.SaveObject.Pathsave);
-                txt_listproductPath.Text = SettingClass.PathListProduct;
-                txt_serverOffline.Text = SettingClass.OfflineServer;
-                txt_userOffline.Text = SettingClass.userOffline;
-                cb_serveroffline.IsChecked = SettingClass.usingOfftlineServer;
-                cb_StartupWindow.IsChecked = SettingClass.IsStartupWindow;
-                txt_timer.Text = SettingClass.timmer.ToString();
-                txt_PLCTimeOut.Text = SettingClass.PLCTimeOut.ToString();
-                passwordBox.Password = SettingClass.password;
+                if (SettingClass != null)
+                {
+
+                 
+                    txt_serverOffline.Text = SettingClass.OfflineServer;
+                    txt_userOffline.Text = SettingClass.userOffline;
+                   
+                    cb_StartupWindow.IsChecked = SettingClass.IsStartupWindow;
+                    txt_timer.Text = SettingClass.timmer.ToString();
+                    txt_PLCTimeOut.Text = SettingClass.PLCTimeOut.ToString();
+                    passwordBox.Password = SettingClass.password;
+                }
 
                 
             }

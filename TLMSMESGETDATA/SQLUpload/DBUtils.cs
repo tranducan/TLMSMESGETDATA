@@ -10,14 +10,23 @@ namespace TLMSMESGETDATA
     class DBUtils
     {
 
-        public static SqlConnection GetDBConnection()
+        public static SqlConnection GetDBConnection(Model.SettingClass settingClass)
         {
-            string datasource = @"FS-35686\SQLEXPRESS";
-            string database = "ERPSOFT";
-            string username = "tldev";
-            string password = "toluen@2007";
+            //string datasource = @"FS-35686\SQLEXPRESS";
+            //string database = "ERPSOFT";
+            //string username = "tldev";
+            //string password = "toluen@2007";
+            string datasource = "";
+            string database = "";
+            string username = "";
+            string password = "";
 
 
+                 datasource = settingClass.OfflineServer == null? "172.16.0.12": settingClass.OfflineServer;
+                database = "ERPSOFT";
+                username = settingClass.userOffline==null? "ERPUSER" : settingClass.userOffline;
+                password = settingClass.password==null ?"12345": settingClass.password;
+           
             //string datasource = @"172.16.1.222\LOCALSQL";
             //string database = "MQCMES";
             //string username = "Automation";

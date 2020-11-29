@@ -15,7 +15,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TLMSMESGETDATA.PLC;
 using System.Diagnostics;
-using PLCSimenNetWrapper;
 using TLMSMESGETDATA.PLC2;
 using System.Windows.Threading;
 using System.Globalization;
@@ -47,15 +46,9 @@ namespace TLMSMESGETDATA
 
         FlowDocument m_flowDoc = null;
         System.Threading.Timer tmrEnsureWorkerGetsCalled;
-        List<Tag> tagsError;
-        List<string> ListBarcode;
+      
 
-        List<string> ListError;
-        List<Tag> tagsbarcode;
-        List<string> ListRework;
-        List<Tag> tagsRework;
-        List<Tag> tags;
-
+    
         DispatcherTimer timer = new DispatcherTimer();
         List<MachineItem> ListMachines;
         // this timer calls bgWorker again and again after regular intervals
@@ -66,7 +59,7 @@ namespace TLMSMESGETDATA
 
         object lockObject = new object();
         List<MachineOperation> machineOperations;
-        List<Tag> ListTagWrite;
+
         Stopwatch stopwatch = new Stopwatch();
 
 
@@ -132,10 +125,8 @@ namespace TLMSMESGETDATA
                 datagridMachines.Items.Refresh();
 
                 lblReadTime.Text = "Circle-time: " + stopwatch.ElapsedMilliseconds.ToString() + " ms";
-                int CountOnline = machineOperations.Where(d => d.Status == ConnectionStates.Online.ToString()).Count();
-                int CountOffline = machineOperations.Where(d => d.Status == ConnectionStates.Offline.ToString()).Count();
-                lblConnectionState.Text = CountOnline.ToString() + " " + ConnectionStates.Online.ToString() + "|" +
-                    CountOffline.ToString() + " " + ConnectionStates.Offline.ToString();
+
+
                 if (CountRefresh == 60)
                 {
                     if (SettingClass.PathListProduct != null && SettingClass.PathListProduct != "")
@@ -442,72 +433,14 @@ namespace TLMSMESGETDATA
         public void LoadAdress()
         {
 
-            //            MysqlMES mysqlMES = new MysqlMES();
-            //            StringBuilder stringBuilder = new StringBuilder();
-            //            stringBuilder.Append(" SELECT * FROM mes.t_mqc_realtime");
-            //            DataTable dt = new DataTable();
-            //            mysqlMES.sqlDataAdapterFillDatatable(stringBuilder.ToString(), ref dt);
-            //            stringBuilder = new StringBuilder();
-            //            stringBuilder.Append(" SELECT lot FROM mes.t_mqc_realtime LIMIT 1 ");
-            //            string test = mysqlMES.sqlExecuteScalarString(stringBuilder.ToString());
-
-            //            stringBuilder = new StringBuilder();
-            //            stringBuilder.Append(@"INSERT INTO mes.t_mqc_realtime(serno,lot,model,site,factory,line,PROCESS,item,inspectdate,inspecttime,DATA,STATUS)
-            //VALUES('B511-1911005-20191125_091327', 'B511-1911005;0010;B01;B01',
-            //'', '', '', '', '', '', '2020-09-09', '22:00:00', '20', '')");
-            //            mysqlMES.sqlExecuteNonQuery(stringBuilder.ToString(), false);
-            //  QRSpilittoClass.QRstring2MQCFormat("s;B511-20040008;BMH1257060S05;PSC;5,000;18/06/2020;;202011;;21202020202020e");
-            // QRSpilittoClass.QRstring2IDFormat("44Z9D075C2O1;TL-0079;Nguyễn Thị Bích Kiều;");
-            //DataMQC dataMQC = new DataMQC();
-            //dataMQC.strQRMES = "s;B511-20040008;BMH1257060S05;PSC;5,000;18/06/2020;;202011;;21202020202020e";
-            //dataMQC.strQRID = "44Z9D075C2O1;TL-0079;Nguyễn Thị Bích Kiều;";
-            //dataMQC.Good_Products_Total = 10;
-            //dataMQC.NG_Products_NG_ = new int[32];
-            //dataMQC.NG_Products_NG_[1] = 2;
-            //dataMQC.NG_Products_Total = 2;
-            //Upload2Mes upload2Mes = new Upload2Mes();
-            //upload2Mes.IsSendData2MES(dataMQC, "test");
-           ListMachines = new List<MachineItem>();
+      
+            ListMachines = new List<MachineItem>();
             PLCData pLCData = new PLCData();
-            ListMachines.Add(new MachineItem { IP = "172.16.1.145", Line = "L03", IsEnable = true });
-         //   ListMachines = pLCData.GetIpMachineRuning();
-            ListBarcode = VariablePLC.barcodeaddress();
+       //     ListMachines.Add(new MachineItem { IP = "172.16.1.145", Line = "L03", IsEnable = true });
+             ListMachines = pLCData.GetIpMachineRuning();
 
-            tagsbarcode = new List<Tag>();
 
-            ListTagWrite = new List<Tag>();
-            Tag tag = new Tag(VariablePLC.AddingAvaiable, "");
-            ListTagWrite.Add(tag);
-            tag = new Tag(VariablePLC.GapQty, "");
-            ListTagWrite.Add(tag);
-            foreach (var item in ListBarcode)
-            {
-                tagsbarcode.Add(new Tag(item, ""));
-            }
-
-            ListError = VariablePLC.List38Errors();
-            tagsError = new List<Tag>();
-            foreach (var item in ListError)
-            {
-                tagsError.Add(new Tag(item, ""));
-            }
-
-            ListRework = VariablePLC.List38Reworks();
-            tagsRework = new List<Tag>();
-            foreach (var item in ListRework)
-            {
-                tagsRework.Add(new Tag(item, ""));
-            }
-            tags = new List<Tag>();
-
-            tag = new Tag(VariablePLC.Good_Products_Total, "");
-            tags.Add(tag);
-            tag = new Tag(VariablePLC.NG_Products_Total, "");
-            tags.Add(tag);
-            tag = new Tag(VariablePLC.RW_Products_Total, "");
-            tags.Add(tag);
-            tag = new Tag(VariablePLC.OnOFF, "");
-            tags.Add(tag);
+          
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -1031,61 +964,10 @@ namespace TLMSMESGETDATA
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-
-                string IPTest = "172.16.1.145";
-
-                Plc.Instance.Connect(IPTest, 3000);
-                var PLCStatus = Plc.Instance.ConnectionState;
-                if (PLCStatus == ConnectionStates.Online)
-                {
-                    bool ReadyStart = (txt_readyStart.Text == "1") ? true : false;
-                    Int16 messageNum = Int16.Parse(txt_messageNumber.Text.Trim());
-                    List<Tag> WriteMessage = new List<Tag>();
-                    WriteMessage.Add(new PLCSimenNetWrapper.Tag(VariablePLC.WriteMessage, (Int16)messageNum));
-                    WriteMessage.Add(new PLCSimenNetWrapper.Tag(VariablePLC.WriteReadyStart, ReadyStart));
-                    Plc.Instance.Write(VariablePLC.OKProduced, (Int16)32);
-                    Plc.Instance.Write(VariablePLC.NGProduced, (Int16)15);
-                    //  Plc.Instance.Write("DB181.DBW206", messageNum);
-                    Plc.Instance.Write(WriteMessage);
-                }
-
-            }
-            catch (Exception ex)
-            {
-
-                SystemLog.Output(SystemLog.MSG_TYPE.Err, ex.Source, ex.Message);
-            }
-        }
+      
 
 
-        private void txt_NGlist_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                string IPTest = "172.16.1.145";
-                stopwatch = new Stopwatch();
-                stopwatch.Start();
-                Plc.Instance.Connect(IPTest, 3000);
-                var PLCStatus = Plc.Instance.ConnectionState;
-                if (PLCStatus == ConnectionStates.Online)
-                {
-                    var NGList = Plc.Instance.ReadObject(3, 0, S7.Net.VarType.Word, 38);// doc 38 items NG neu OK thi doi DB thanh 4 de doc 38 items RW
-                    var Values = (int[])NGList;
-                }
-                stopwatch.Stop();
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "tack-time", stopwatch.ElapsedMilliseconds.ToString());
-            }
-            catch (Exception ex)
-            {
-
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "Error", ex.Message);
-            }
-        
-        }
+       
     }
 }
 

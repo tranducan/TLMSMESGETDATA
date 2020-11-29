@@ -71,11 +71,8 @@
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>
-        <CheckBox x:Name="cb_GetFirstValues" Content="Is Get First Values " Margin="188,41,127.6,0" Height="15" VerticalAlignment="Top"/>
+        <CheckBox x:Name="cb_GetFirstValues" Content="Is Get First Values " Margin="188,31,127.6,0" Height="15" VerticalAlignment="Top"/>
         <Button x:Name="btn_GetValue" Content="Get value" Margin="396,10,35.6,10.4" Click="btn_GetValue_Click" RenderTransformOrigin="0.503,0.505"/>
-        <Button Content="Write Data" HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" Width="75" Height="19" Grid.Row="3" Click="Button_Click"/>
-        <TextBox x:Name="txt_readyStart" HorizontalAlignment="Left" Height="23" Margin="111,33,0,0" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="txt_messageNumber" Height="23" Margin="275,33,94.6,0" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

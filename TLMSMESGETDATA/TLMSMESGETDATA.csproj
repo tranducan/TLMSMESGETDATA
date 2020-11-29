@@ -41,9 +41,6 @@
     <Reference Include="MySql.Data, Version=8.0.21.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>..\packages\MySql.Data.8.0.21\lib\net452\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="PLCSimenNetWrapper">
-      <HintPath>..\PLCSimenNetWrapper\bin\Debug\PLCSimenNetWrapper.dll</HintPath>
-    </Reference>
     <Reference Include="Renci.SshNet, Version=2016.1.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
       <HintPath>..\packages\SSH.NET.2016.1.0\lib\net40\Renci.SshNet.dll</HintPath>
     </Reference>
@@ -123,6 +120,7 @@
     <Compile Include="SQLUpload\DBUtilsMySQL.cs" />
     <Compile Include="SQLUpload\ExportListProduct.cs" />
     <Compile Include="SQLUpload\LocalPLCSql.cs" />
+    <Compile Include="SQLUpload\MQCversionApply.cs" />
     <Compile Include="SQLUpload\MysqlMES.cs" />
     <Compile Include="SQLUpload\sqlCON.cs" />
     <Compile Include="SQLUpload\sqlERPCON.cs" />
@@ -133,6 +131,9 @@
     <Compile Include="SQLUpload\Upload2MESMySQL.cs" />
     <Compile Include="View\ConfigureWindow.xaml.cs">
       <DependentUpon>ConfigureWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\MQCversionApply.xaml.cs">
+      <DependentUpon>MQCversionApply.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -152,10 +153,13 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\MQCversionApply.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\MachineItem.cs" />
-    <Compile Include="PLC2\PLC.cs" />
     <Compile Include="PLC2\PLC.DB1.cs" />
     <Compile Include="PLC2\VariablePLC.cs" />
     <Compile Include="PLC\DbPLC.cs" />

@@ -12,13 +12,16 @@ namespace TLMSMESGETDATA
 
         public static SqlConnection GetDBConnection()
         {
-          
+            string datasource = @"FS-35686\SQLEXPRESS";
+            string database = "ERPSOFT";
+            string username = "tldev";
+            string password = "toluen@2007";
 
-           
-            string datasource = @"172.16.1.222\LOCALSQL";
-            string database = "MQCMES";
-            string username = "Automation";
-            string password = "12345";
+
+            //string datasource = @"172.16.1.222\LOCALSQL";
+            //string database = "MQCMES";
+            //string username = "Automation";
+            //string password = "12345";
 
 
             return DBSQLServerUtils.GetDBConnection(datasource, database, username, password);

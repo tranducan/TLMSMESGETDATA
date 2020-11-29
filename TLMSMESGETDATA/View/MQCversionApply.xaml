@@ -1,0 +1,19 @@
+﻿<Window x:Class="TLMSMESGETDATA.View.MQCversionApply"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TLMSMESGETDATA.View"
+        mc:Ignorable="d"
+        Title="MQCversionApply" Height="450" Width="800" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="81*"/>
+            <RowDefinition Height="91*"/>
+            <RowDefinition Height="248*"/>
+        </Grid.RowDefinitions>
+        <DataGrid HorizontalAlignment="Left" Margin="0,7,0,10" Grid.Row="2" Width="784"/>
+        <Button Content="Update" Name="btn_update" Click="btn_update_Click" HorizontalAlignment="Left" Margin="10,0,0,9.8" Width="75" RenderTransformOrigin="-0.84,1.177" Height="19" VerticalAlignment="Bottom"/>
+
+    </Grid>
+</Window>

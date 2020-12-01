@@ -15,7 +15,7 @@ namespace TLMSMESGETDATA.SQLUpload
 
             string datasource = @"172.16.0.22";
             string port = "3306";
-            string database = "mes_2";
+            string database = "mes_interface";
             string username = "guest";
             string password = "guest@123";
 

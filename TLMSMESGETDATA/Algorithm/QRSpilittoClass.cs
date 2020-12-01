@@ -57,8 +57,14 @@ namespace TLMSMESGETDATA.Algorithm
                     qRIDMES.str1 = QRArray[0];
                     qRIDMES.ID = QRArray[1];
                     qRIDMES.FullName = QRArray[2];
-                    return qRIDMES;
+                   
                 }
+                    if(QRArray.Count()==0)
+                {                   
+                    qRIDMES.ID = QRArray[0];
+    
+                }    
+
 
              
                

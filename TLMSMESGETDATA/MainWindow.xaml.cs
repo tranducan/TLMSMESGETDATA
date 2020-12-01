@@ -84,7 +84,7 @@ namespace TLMSMESGETDATA
             SystemLog.Output(SystemLog.MSG_TYPE.War, Title, "Started ");
             SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Record- Reset", DateTime.Now.ToString("dd-MM-yyyy"));
             machineOperations = new List<MachineOperation>();
-      
+            QRMQC_MES qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat("s;WO2020110948;BMH1257070S03;1257070S03;400;26/11/2020;;BMH1257070S0320201126;;JO2020111777e");
             //timer.Interval = TimeSpan.FromMilliseconds(100);
             //timer.Tick += timer_Tick;
             //timer.IsEnabled = true;
@@ -483,8 +483,9 @@ namespace TLMSMESGETDATA
             m_notify.Visible = true;
             m_notify.DoubleClick += (object send, EventArgs args) => { this.Show(); this.WindowState = WindowState.Normal; this.ShowInTaskbar = true; };
             m_notify.ContextMenu = menu;
-            m_notify.Text = "PLC To GMES";
             Version ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            m_notify.Text = string.Format("PLC To GMES: v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Build);
+            
             string str = string.Format("PLC To GMES: v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Build);
             notiftyBalloonTip(str, 1000);
 

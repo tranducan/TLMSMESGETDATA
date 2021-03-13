@@ -42,9 +42,18 @@ namespace TLMSMESGETDATA.SQLUpload
             stringBuilder.Append(" declare @QRMES varchar(100) set @QRMES = '" + qCVariable.QRMES + "' ");
             stringBuilder.Append(" declare @StartDate datetime2(7) set @StartDate = GETDATE() ");
             stringBuilder.Append(" declare @EndDate datetime2(7) set @EndDate = GETDATE() ");
-            stringBuilder.Append(" declare @OPQty int set @OPQty = "+ qCVariable.ListMQCQty[0]);
-            stringBuilder.Append(" declare @NGQty int set @NGQty = " + qCVariable.ListMQCQty[1]);
-            stringBuilder.Append(" declare @RWQty int set @RWQty =" + qCVariable.ListMQCQty[2]);
+                if (qCVariable.ListMQCQty.Count() == 3)
+                {
+                    stringBuilder.Append(" declare @OPQty int set @OPQty = " + qCVariable.ListMQCQty[0]);
+                    stringBuilder.Append(" declare @NGQty int set @NGQty = " + qCVariable.ListMQCQty[1]);
+                    stringBuilder.Append(" declare @RWQty int set @RWQty =" + qCVariable.ListMQCQty[2]);
+                }
+                else
+                {
+                    stringBuilder.Append(" declare @OPQty int set @OPQty = " + 0);
+                    stringBuilder.Append(" declare @NGQty int set @NGQty = " + 0);
+                    stringBuilder.Append(" declare @RWQty int set @RWQty =" + 0);
+                }
             stringBuilder.Append(" declare @Line varchar(10) set @Line = '" + line +"' ");
             stringBuilder.Append(@" select * from m_MQCQR_Record where QR = @QRMES
 	IF NOT EXISTS (SELECT * FROM m_MQCQR_Record (NOLOCK) WHERE QR = @QRMES)

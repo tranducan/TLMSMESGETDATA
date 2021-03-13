@@ -59,7 +59,7 @@ namespace TLMSMESGETDATA.Algorithm
                     qRIDMES.FullName = QRArray[2];
                    
                 }
-                    if(QRArray.Count()==0)
+                    if(QRArray.Count()==1)//ma moi se vao day
                 {                   
                     qRIDMES.ID = QRArray[0];
     

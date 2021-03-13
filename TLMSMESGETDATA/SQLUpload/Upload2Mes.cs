@@ -79,9 +79,9 @@ namespace TLMSMESGETDATA.SQLUpload
                 sqlQuerry += "insert into t_mqc_realtime (serno, lot, model, site, factory, line, process,item,inspectdate,inspecttime, data, judge,status,remark,inspector,TL01 ) values( '";
                 sqlQuerry += serno + "', '" + qRMQC_MES.PO + "', '" + model + "', '" + site + "', '" + factory + "', '" + line +
                "', '" + process + "', '" + item + "', '" + date_ + "', '" + time_ + "', '" + data + "', '" + "" + "', '" + status + "', '" + Remark + "' , '" + qRIDMES.ID + "', '" + qRIDMES.FullName + "' )";
-                //MysqlMES mysqlMES= new MysqlMES();
-                //return mysqlMES.sqlExecuteNonQuery(sqlQuerry, false);
-                return true;
+                MysqlMES mysqlMES= new MysqlMES();
+                return mysqlMES.sqlExecuteNonQuery(sqlQuerry, false);
+               // return true;
             }
             catch (Exception ex)
             {

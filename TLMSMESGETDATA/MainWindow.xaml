@@ -71,7 +71,7 @@
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>
-        <Button x:Name="btn_GetValue" Content="Get value" Margin="396,10,34.8,10.4" Click="btn_GetValue_Click" RenderTransformOrigin="0.503,0.505"/>
+      
 
     </Grid>
 </Window>

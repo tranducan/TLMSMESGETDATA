@@ -19,6 +19,8 @@ public    class SettingClass
         public int PLCTimeOut { get; set; }
         public bool IsStartupWindow { get; set; }
 
+        public string TechLinkDatabse { get; set; }
+
 
     }
 }

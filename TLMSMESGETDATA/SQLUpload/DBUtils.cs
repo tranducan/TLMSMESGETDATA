@@ -41,11 +41,13 @@ namespace TLMSMESGETDATA
         {
             //Data Source = LONG; Initial Catalog = TEST; Integrated Security = True
             string datasource = "172.16.0.11";
-            string database = "TLVN2";
+
+            string database =  "TLVN2";
             string username = "soft";
             string password = "techlink@!@#";
 
-           
+            if (MainWindow.SettingClass.TechLinkDatabse != null)
+                database = MainWindow.SettingClass.TechLinkDatabse;
 
 
             return DBSQLServerUtils.GetERPDBConnection(datasource, database, username, password);
@@ -61,13 +63,24 @@ namespace TLMSMESGETDATA
 
             return DBSQLServerUtils.GetSFTDBConnection(datasource, database, username, password);
         }
+        //public static SqlConnection GetERPTargetBConnection()
+        //{
+        //    //Data Source = LONG; Initial Catalog = TEST; Integrated Security = True
+        //    string datasource = "172.16.0.11";
+        //    string database = "SOT";
+        //    string username = "sa";
+        //    string password = "dsc@123";
+
+
+        //    return DBSQLServerUtils.GetSFTDBConnection(datasource, database, username, password);
+        //}
         public static SqlConnection GetERPTargetBConnection()
         {
             //Data Source = LONG; Initial Catalog = TEST; Integrated Security = True
             string datasource = "172.16.0.11";
             string database = "SOT";
-            string username = "sa";
-            string password = "dsc@123";
+            string username = "soft";
+            string password = "techlink@!@#";
 
 
             return DBSQLServerUtils.GetSFTDBConnection(datasource, database, username, password);

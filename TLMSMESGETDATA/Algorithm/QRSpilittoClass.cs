@@ -23,12 +23,14 @@ namespace TLMSMESGETDATA.Algorithm
                     var QRArray = QRstr.Substring(1, QRstr.Length - 2).Split(';');
                     if(QRArray.Count() == 10)
                     {
-                        qRMQC_MES.PO = QRArray[2];
-                        qRMQC_MES.Product = QRArray[3];
-                      //  qRMQC_MES.Unit = QRArray[4];
+                        qRMQC_MES.PO = QRArray[1];
+                        qRMQC_MES.Product = QRArray[2];
+                        qRMQC_MES.lot = QRArray[3];
+                        qRMQC_MES.str1 = QRArray[3];
+                        //  qRMQC_MES.Unit = QRArray[4];
                         qRMQC_MES.quantity = int.Parse(QRArray[4],NumberStyles.AllowThousands);
                         qRMQC_MES.dateTime = QRArray[5];
-                        qRMQC_MES.str1 = QRArray[6];
+                       // qRMQC_MES.str1 = QRArray[6];
                         qRMQC_MES.str2 = QRArray[7];
                         qRMQC_MES.str3 = QRArray[8];
                         qRMQC_MES.str4 = QRArray[9];
@@ -76,6 +78,7 @@ public    class QRMQC_MES
     {
         public string PO { get; set; }
         public string Product { get; set; }
+        public string lot { get; set; }
         public string Unit { get; set; }
         public int quantity { get; set; }
         public string dateTime { get; set; }

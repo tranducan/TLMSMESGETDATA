@@ -82,6 +82,24 @@ namespace TLMSMESGETDATA.Sharp
             return Result;
 
         }
+        public void WriteQRMESto(int DbNumber, int Start, int Amount, string Text)
+        {
+         
+            try
+            {
+               byte[] Buffer = new byte[65536];
+                Sharp7.S7.SetCharsAt(Buffer, 0, Text);
+                Client.WriteArea(S7Area.DB, DbNumber, Start, Amount, S7WordLength.Byte, Buffer);
+              
+            }
+            catch (Exception ex)
+            {
+
+                SystemLog.Output(SystemLog.MSG_TYPE.Err, "ReadArea Byte to String fail", ex.Message);
+            }
+        
+
+        }
         public List<int> ReadAreaIntToListInt(int DbNumber, int Start, int Amount)
         {
             List<int> Result = new List<int>();

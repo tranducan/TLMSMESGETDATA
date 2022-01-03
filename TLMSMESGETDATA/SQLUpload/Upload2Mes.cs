@@ -12,30 +12,36 @@ namespace TLMSMESGETDATA.SQLUpload
 {
   public   class Upload2Mes
     {
-        public bool IsSendData2MES(Model.MQCVariable mQCVariable, string line)
+        public bool IsSendData2MES(Model.MQCVariable mQCVariable,string Type, string line)
         {
             try
-            {
-                if (mQCVariable.ListMQCQty[0] > 0)
-                    InsertRowMQVariables(mQCVariable, mQCVariable.ListMQCQty[0].ToString(), line, "OUTPUT");
-
-                if (mQCVariable.ListMQCQty[1] > 0)
+            {   if (Type == "OPQTY")
                 {
-                    for (int i = 0; i < 38; i++)
+                    if (mQCVariable.ListMQCQty[0] > 0)
+                        InsertRowMQVariables(mQCVariable, mQCVariable.ListMQCQty[0].ToString(), line, "OUTPUT");
+                }
+                else if (Type == "NGQTY")
+                {
+                    if (mQCVariable.ListMQCQty[1] > 0)
                     {
-                        if (mQCVariable.ListNG38[i] > 0)
-                            InsertRowMQVariables(mQCVariable, mQCVariable.ListNG38[i].ToString(), line, "NG" + (i + 1).ToString());
+                        for (int i = 0; i < 38; i++)
+                        {
+                            if (mQCVariable.ListNG38[i] > 0)
+                                InsertRowMQVariables(mQCVariable, mQCVariable.ListNG38[i].ToString(), line, "NG" + (i + 1).ToString());
 
+                        }
                     }
                 }
-
-                if (mQCVariable.ListMQCQty[2] > 0)
+                else if (Type == "RWQTY")
                 {
-                    for (int i = 0; i < 38; i++)
+                    if (mQCVariable.ListMQCQty[2] > 0)
                     {
-                        if (mQCVariable.ListRW38[i] > 0)
-                            InsertRowMQVariables(mQCVariable, mQCVariable.ListRW38[i].ToString(), line, "RW" + (i + 1).ToString());
+                        for (int i = 0; i < 38; i++)
+                        {
+                            if (mQCVariable.ListRW38[i] > 0)
+                                InsertRowMQVariables(mQCVariable, mQCVariable.ListRW38[i].ToString(), line, "RW" + (i + 1).ToString());
 
+                        }
                     }
                 }
             }

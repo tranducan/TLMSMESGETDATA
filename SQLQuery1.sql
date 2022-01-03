@@ -1,1 +1,0 @@
-﻿select factory, line, modelPLC, IPPLC from m_ipPLC where isactive = 'True'

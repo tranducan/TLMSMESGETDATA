@@ -15,13 +15,17 @@ namespace TLMSMESGETDATA.Algorithm
             {
                 if(TypeChange == "OPQTY")
                 {
+                    if (mQCChanged.ListMQCQty[0] > 30)
+                        SystemLog.Output(SystemLog.MSG_TYPE.War, "insert Output quantity seems like abnormal", "Output : " + mQCChanged.ListMQCQty[0].ToString());
                     InsertToMQCMES_Realtime(mQCChanged.QRMES, mQCChanged.QRID, Line, "OUTPUT", mQCChanged.ListMQCQty[0].ToString(), "OP");
                 }
                 if(TypeChange == "NGQTY")
                 {
                     for (int i = 0; i < mQCChanged.ListNG38.Count; i++)
                     {
-                        if(mQCChanged.ListNG38[i] > 0 )
+                        if (mQCChanged.ListNG38[i] > 10)
+                            SystemLog.Output(SystemLog.MSG_TYPE.War, "insert NG quantity seems like abnormal", "NG" + (i + 1).ToString()+": " + mQCChanged.ListNG38[i].ToString());
+                        if (mQCChanged.ListNG38[i] > 0 )
                         InsertToMQCMES_Realtime(mQCChanged.QRMES, mQCChanged.QRID, Line, "NG"+(i+1).ToString(), mQCChanged.ListNG38[i].ToString(), "NG");
                     }
                   
@@ -30,6 +34,8 @@ namespace TLMSMESGETDATA.Algorithm
                 {
                     for (int i = 0; i < mQCChanged.ListRW38.Count; i++)
                     {
+                        if (mQCChanged.ListRW38[i] > 10)
+                            SystemLog.Output(SystemLog.MSG_TYPE.War, "insert RW quantity seems like abnormal", "RW" + (i + 1).ToString() + ": " + mQCChanged.ListRW38[i].ToString());
                         if (mQCChanged.ListRW38[i] > 0)
                             InsertToMQCMES_Realtime(mQCChanged.QRMES, mQCChanged.QRID, Line, "RW" + (i + 1).ToString(), mQCChanged.ListRW38[i].ToString(), "RW");
                     }

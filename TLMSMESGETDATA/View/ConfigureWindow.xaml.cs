@@ -36,6 +36,7 @@ namespace TLMSMESGETDATA.View
             SettingClass.password = passwordBox.Password;
           
             SettingClass.IsStartupWindow = (bool)cb_StartupWindow.IsChecked;
+            SettingClass.TechLinkDatabse = txt_database.Text.Trim();
          
            
             try
@@ -83,6 +84,7 @@ namespace TLMSMESGETDATA.View
                     txt_timer.Text = SettingClass.timmer.ToString();
                     txt_PLCTimeOut.Text = SettingClass.PLCTimeOut.ToString();
                     passwordBox.Password = SettingClass.password;
+                    txt_database.Text = SettingClass.TechLinkDatabse;
                 }
 
                 

@@ -27,15 +27,13 @@ namespace TLMSMESGETDATA
                     if (QRMES.EndsWith("e"))
                     {
                         var QRArray = QRMES.Substring(1, QRMES.Length - 2).Split(';');
-                        if (QRArray.Count() == 10)
-                        {
+
                             IsQRMES = true;
-                        }
                     }
                     else
                     {
 
-                        SystemLog.Output(SystemLog.MSG_TYPE.War, "QR MES nust format start with: e", QRMES);
+                        SystemLog.Output(SystemLog.MSG_TYPE.War, "QR MES nust format end with: e", QRMES);
                         return 1;
 
                     }

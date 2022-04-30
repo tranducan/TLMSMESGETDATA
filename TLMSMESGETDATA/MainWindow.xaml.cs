@@ -84,14 +84,6 @@ namespace TLMSMESGETDATA
             SystemLog.Output(SystemLog.MSG_TYPE.War, Title, "Started ");
             SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Record- Reset", DateTime.Now.ToString("dd-MM-yyyy"));
             machineOperations = new List<MachineOperation>();
-            string Qrmes = "s;B51121020022;BMH1249200S02;4RFDFUTN2PC1;103;13/03/2021;;BMH1249200S022021313;;JO202131252e";
-            string QrId = "TL-10940";
-            var ResultValidationQRCode = SubFunction.IsValidationQRCode(Qrmes, QrId);
-            QRMQC_MES qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(Qrmes);
-             QRIDMES qRIDMES = QRSpilittoClass.QRstring2IDFormat("TL-xxxxx");
-            //timer.Interval = TimeSpan.FromMilliseconds(100);
-            //timer.Tick += timer_Tick;
-            //timer.IsEnabled = true;
 
         }
         #region backgroundworker
@@ -106,15 +98,8 @@ namespace TLMSMESGETDATA
 
             // work happens in this method
             bgWorker.DoWork += new DoWorkEventHandler(bg_DoWork);
-            bgWorker.ProgressChanged += BgWorker_ProgressChanged;
             bgWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bg_RunWorkerCompleted);
             bgWorker.WorkerReportsProgress = true;
-
-        }
-        private void BgWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-
-
 
         }
 
@@ -156,141 +141,107 @@ namespace TLMSMESGETDATA
             {
 
                 stopwatch.Start();
-                //    if (ListMachines != null)
+
+                machineOperations = new List<MachineOperation>();
+                LoadAdress();//load list PLC machine
+                foreach (var machine in ListMachines)
                 {
-                    machineOperations = new List<MachineOperation>();
-                    //MachineItem machine = new MachineItem();
-                    //machine.IP = "172.16.1.145";
-                    //machine.Line = "L03";
-                    LoadAdress();//load list PLC machine
-                    foreach (var machine in ListMachines)
+                    try
                     {
-                        try
+                        //     machine.IP = 
+                        MQCVariable mQCOld = new MQCVariable();
+                        if (DicMQCVariableIP.ContainsKey(machine.IP))
+                            mQCOld = DicMQCVariableIP[machine.IP];
+
+
+                        MQCVariable mQCPLC = GetMQCVariableRealtime(machine.IP, mQCOld);
+                        MQCVariable mQCChanged = new MQCVariable();
+                        if (mQCPLC.Connection == 0)
                         {
-                            //     machine.IP = 
-                            MQCVariable mQCOld = new MQCVariable();
-                            if (DicMQCVariableIP.ContainsKey(machine.IP))
-                                mQCOld = DicMQCVariableIP[machine.IP];
 
-
-                            MQCVariable mQCPLC = GetMQCVariableRealtime(machine.IP, mQCOld);
-                            MQCVariable mQCChanged = new MQCVariable();
-                            if (mQCPLC.Connection == 0)
+                            bool isChanged = false;
+                            List<string> listChanged = new List<string>();
+                            //   if (mQCPLC.DicSPLCtatus[VariablePLC.FlagKT] == true)
                             {
-                                bool isChanged = false;
-                                List<string> listChanged = new List<string>();
-                                //   if (mQCPLC.DicSPLCtatus[VariablePLC.FlagKT] == true)
+                                mQCChanged = GetMQCVariableDisCrepancy(mQCPLC, mQCOld, ref isChanged, ref listChanged);
+                                if (DicMQCVariableIP.ContainsKey(machine.IP))
+                                    DicMQCVariableIP[machine.IP] = mQCPLC;
+                                else
                                 {
-                                    mQCChanged = GetMQCVariableDisCrepancy(mQCPLC, mQCOld, ref isChanged, ref listChanged);
-                                    if (DicMQCVariableIP.ContainsKey(machine.IP))
-                                        DicMQCVariableIP[machine.IP] = mQCPLC;
+                                    DicMQCVariableIP.Add(machine.IP, mQCPLC);
+                                }
+                                if (listChanged.Contains("Reset"))
+                                {
+                                    SQLUpload.SQLQRUpdate sQLQRUpdate = new SQLQRUpdate();
+                                    sQLQRUpdate.UpdateOrInsertQRRecordTable(mQCOld, machine.Line);
+
+                                    SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "QR MES Reset", mQCOld.QRMES);
+                                    SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "QR Inspector", mQCOld.QRID);
+                                    if (mQCOld.ListMQCQty.Count() == 3)
+                                    {
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Ouput Quantity", mQCOld.ListMQCQty[0].ToString());
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "NG Quantity", mQCOld.ListMQCQty[1].ToString());
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "RW Quantity", mQCOld.ListMQCQty[2].ToString());
+                                    }
                                     else
                                     {
-                                        DicMQCVariableIP.Add(machine.IP, mQCPLC);
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Ouput Quantity: 0", "PLC can't get data from PLC");
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "NG Quantity: 0", "PLC can't get data from PLC");
+                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "RW Quantity: 0", "PLC can't get data from PLC");
                                     }
-                                    if (listChanged.Contains("Reset"))
-                                    {
-                                        //MachineOperation operation = new MachineOperation();
-                                        //operation.IP = machine.IP;
-                                        //operation.Line = machine.Line;
-                                        //operation.Lot = qRMQC_MES.PO;
-                                        //operation.Inspector = qRIDMES.FullName;
-                                        //operation.product = qRMQC_MES.Product;
-
-                                        //operation.Output = mQCPLC.ListMQCQty[0];
-                                        //operation.NG = mQCPLC.ListMQCQty[1];
-                                        //operation.Rework = mQCPLC.ListMQCQty[2];
-                                        //operation.Status = "Reset";
-                                        SQLUpload.SQLQRUpdate sQLQRUpdate = new SQLQRUpdate();
-                                        sQLQRUpdate.UpdateOrInsertQRRecordTable(mQCOld, machine.Line);
-
-                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "QR MES Reset", mQCOld.QRMES);
-                                        SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "QR Inspector", mQCOld.QRID);
-                                        if (mQCOld.ListMQCQty.Count() == 3)
-                                        {
-                                            SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Ouput Quantity", mQCOld.ListMQCQty[0].ToString());
-                                            SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "NG Quantity", mQCOld.ListMQCQty[1].ToString());
-                                            SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "RW Quantity", mQCOld.ListMQCQty[2].ToString());
-                                        }
-                                        else
-                                        {
-                                            SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Ouput Quantity: 0", "PLC can't get data from PLC");
-                                            SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "NG Quantity: 0", "PLC can't get data from PLC");
-                                            SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "RW Quantity: 0", "PLC can't get data from PLC");
-                                        }
-                                        return;
-                                    }
-                                    else if (listChanged.Contains("QRCheck"))
-                                    {
-                                        QRMQC_MES QRMES = QRSpilittoClass.QRstring2MQCFormat(mQCPLC.QRMES);
-                                        SubFunction.InsertTargettoSOTDb(mQCPLC.QRMES, QRMES.Product, QRMES.quantity, 0);
-                                    }
-                                    UploadPLCtoDatabase(mQCChanged, listChanged, machine.Line);
-
-                                    QRMQC_MES qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(mQCPLC.QRMES);
-                                    QRIDMES qRIDMES = QRSpilittoClass.QRstring2IDFormat(mQCPLC.QRID);
-
-                                    MachineOperation operation = new MachineOperation();
-                                    operation.QR = mQCPLC.QRMES;
-                                    operation.IP = machine.IP;
-                                    operation.Line = machine.Line;
-                                    operation.Lot = qRMQC_MES.PO;
-                                    operation.Inspector = qRIDMES.ID;
-                                    operation.product = qRMQC_MES.Product;
-                                    if (mQCPLC.ListMQCQty.Count == 3)
-                                    {
-                                        operation.Output = mQCPLC.ListMQCQty[0];
-                                        operation.NG = mQCPLC.ListMQCQty[1];
-                                        operation.Rework = mQCPLC.ListMQCQty[2];
-                                        operation.Status = "Updating";
-                                    }
-                                    else if (mQCPLC.ListMQCQty.Count == 0)
-                                    {
-                                        operation.Output = 0;
-                                        operation.NG = 0;
-                                        operation.Rework = 0;
-                                        operation.Status = "Waiting";
-                                    }
-                                    //if (listChanged.Contains("Reset"))
-                                    //{
-                                    //    operation.Status = "Reset";
-                                    //    //SQLUpload.SQLQRUpdate sQLQRUpdate = new SQLQRUpdate();
-                                    //    //sQLQRUpdate.UpdateOrInsertQRRecordTable(mQCPLC, machine.Line);
-                                    //    SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "QR MES Reset", mQCPLC.QRMES);
-                                    //    SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "QR Inspector", mQCPLC.QRID);
-                                    //    SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "Ouput Quantity", mQCPLC.ListMQCQty[0].ToString());
-                                    //    SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "NG Quantity", mQCPLC.ListMQCQty[1].ToString());
-                                    //    SystemRecord.Output(SystemRecord.MSG_TYPE.Nor, "RW Quantity", mQCPLC.ListMQCQty[2].ToString());
-
-                                    //}
-                                    //else
-                                    //{
-                                    //    operation.Status = "Updating";
-                                    //}
-
-                                    machineOperations.Add(operation);
+                                    return;
                                 }
-                            }
-                            else
-                            {
+                                else if (listChanged.Contains("QRCheck"))
+                                {
+                                    QRMQC_MES QRMES = QRSpilittoClass.QRstring2MQCFormat(mQCPLC.QRMES);
+                                    SubFunction.InsertTargettoSOTDb(mQCPLC.QRMES, QRMES.Product, QRMES.quantity, 0);
+                                }
+                                UploadPLCtoDatabase(mQCChanged, listChanged, machine.Line);
+
+                                QRMQC_MES qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(mQCPLC.QRMES);
+                                QRIDMES qRIDMES = QRSpilittoClass.QRstring2IDFormat(mQCPLC.QRID);
+
                                 MachineOperation operation = new MachineOperation();
+                                operation.QR = mQCPLC.QRMES;
                                 operation.IP = machine.IP;
                                 operation.Line = machine.Line;
-                                Sharp7.S7Client client = new Sharp7.S7Client();
-                                operation.Status = client.ErrorText(mQCPLC.Connection);
+                                operation.Lot = qRMQC_MES.PO;
+                                operation.Inspector = qRIDMES.ID;
+                                operation.product = qRMQC_MES.Product;
+                                if (mQCPLC.ListMQCQty.Count == 3)
+                                {
+                                    operation.Output = mQCPLC.ListMQCQty[0];
+                                    operation.NG = mQCPLC.ListMQCQty[1];
+                                    operation.Rework = mQCPLC.ListMQCQty[2];
+                                    operation.Status = "Updating";
+                                }
+                                else if (mQCPLC.ListMQCQty.Count == 0)
+                                {
+                                    operation.Output = 0;
+                                    operation.NG = 0;
+                                    operation.Rework = 0;
+                                    operation.Status = "Waiting";
+                                }
                                 machineOperations.Add(operation);
                             }
                         }
-                        catch (Exception ex)
+                        else
                         {
-
-                            SystemLog.Output(SystemLog.MSG_TYPE.Err, "PLC IP : " + machine.IP, ex.Message);
+                            MachineOperation operation = new MachineOperation();
+                            operation.IP = machine.IP;
+                            operation.Line = machine.Line;
+                            Sharp7.S7Client client = new Sharp7.S7Client();
+                            operation.Status = client.ErrorText(mQCPLC.Connection);
+                            machineOperations.Add(operation);
                         }
+                    }
+                    catch (Exception ex)
+                    {
 
+                        SystemLog.Output(SystemLog.MSG_TYPE.Err, "PLC IP : " + machine.IP, ex.Message);
                     }
 
                 }
-
 
                 stopwatch.Stop();
             }
@@ -312,24 +263,24 @@ namespace TLMSMESGETDATA
                 {
 
                     UploadLocalPLCDB uploadLocal = new UploadLocalPLCDB();
-                    Upload2Mes upload2Mes = new Upload2Mes();
+                    //Upload2Mes upload2Mes = new Upload2Mes();
                     if (listChanged.Contains("OPQTY"))
                     {
-                       
+
                         uploadLocal.InsertMQCMESUpdateRealtime(mqcchanged, "OPQTY", line, SettingClass);
 
-                        upload2Mes.IsSendData2MES(mqcchanged, "OPQTY", line);
+                        //upload2Mes.IsSendData2MES(mqcchanged, "OPQTY", line);
                         //Upload OP QTY change
                     }
                     if (listChanged.Contains("NGQTY"))
                     {
                         uploadLocal.InsertMQCMESUpdateRealtime(mqcchanged, "NGQTY", line, SettingClass);
-                        upload2Mes.IsSendData2MES(mqcchanged, "NGQTY", line);
+                       // upload2Mes.IsSendData2MES(mqcchanged, "NGQTY", line);
                     }
                     if (listChanged.Contains("RWQTY"))
                     {
                         uploadLocal.InsertMQCMESUpdateRealtime(mqcchanged, "RWQTY", line, SettingClass);
-                        upload2Mes.IsSendData2MES(mqcchanged, "RWQTY", line);
+                        //upload2Mes.IsSendData2MES(mqcchanged, "RWQTY", line);
                     }
 
                     if (listChanged.Contains("Reset"))
@@ -338,10 +289,6 @@ namespace TLMSMESGETDATA
 
                     }
                 }
-                else
-                {
-                    SystemLog.Output(SystemLog.MSG_TYPE.War, "QR barcode are wrong format", mqcchanged.QRMES + "|", mqcchanged.QRID);
-                }
             }
 
 
@@ -349,17 +296,15 @@ namespace TLMSMESGETDATA
             {
 
                 SystemLog.Output(SystemLog.MSG_TYPE.Err, "UploadPLCtoDatabase", ex.Message);
-            }  
-       
-        }
+            }
 
-        
+        }
         public MQCVariable GetMQCVariableDisCrepancy(MQCVariable mQCPLC, MQCVariable mQCOld, ref bool Ischanged, ref List<string> typeChange)
         {
             MQCVariable qCVariableChanged = new MQCVariable();
             qCVariableChanged.QRMES = mQCPLC.QRMES;
             qCVariableChanged.QRID = mQCPLC.QRID;
-            
+
             try
             {
                 if (mQCPLC.DicSPLCtatus.ContainsKey(VariablePLC.IsReset) && mQCOld.DicSPLCtatus.ContainsKey(VariablePLC.IsReset))
@@ -375,10 +320,10 @@ namespace TLMSMESGETDATA
                 if (mQCPLC.DicSPLCtatus.ContainsKey(VariablePLC.FlagKT) && mQCOld.DicSPLCtatus.ContainsKey(VariablePLC.FlagKT))
                 {
                     if (mQCPLC.DicSPLCtatus[VariablePLC.FlagKT] != mQCOld.DicSPLCtatus[VariablePLC.FlagKT])
-                {
-                    Ischanged = true;
-                    typeChange.Add("QRCheck");
-                }
+                    {
+                        Ischanged = true;
+                        typeChange.Add("QRCheck");
+                    }
                     if (mQCOld.DicSPLCtatus[VariablePLC.FlagKT] == true)
                     {
                         qCVariableChanged.ListMQCQty.Add(0);
@@ -403,7 +348,7 @@ namespace TLMSMESGETDATA
                             qCVariableChanged.ListMQCQty[0] = mQCPLC.ListMQCQty[0] - mQCOld.ListMQCQty[0];
                             Ischanged = true;
                             typeChange.Add("OPQTY");
-                            
+
                             if (qCVariableChanged.ListMQCQty[0] > 30)
                             {
                                 SystemLog.Output(SystemLog.MSG_TYPE.War, "Detecting abnormal reading output value from PLC", "New value: " + mQCPLC.ListMQCQty[0] + " old value: " + mQCOld.ListMQCQty[0]);
@@ -448,7 +393,7 @@ namespace TLMSMESGETDATA
             }
             return qCVariableChanged;
         }
- 
+
         void tmrCallBgWorker_Tick(object sender, EventArgs e)
         {
             if (Monitor.TryEnter(lockObject))
@@ -496,14 +441,14 @@ namespace TLMSMESGETDATA
         public void LoadAdress()
         {
 
-      
+
             ListMachines = new List<MachineItem>();
             PLCData pLCData = new PLCData();
-       //     ListMachines.Add(new MachineItem { IP = "172.16.1.145", Line = "L03", IsEnable = true });
-             ListMachines = pLCData.GetIpMachineRuning();
+            //     ListMachines.Add(new MachineItem { IP = "172.16.1.145", Line = "L03", IsEnable = true });
+            ListMachines = pLCData.GetIpMachineRuning();
 
 
-          
+
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -514,7 +459,7 @@ namespace TLMSMESGETDATA
                 //EventBroker.AddTimeEvent(EventBroker.EventID.etUpdateMe, m_timerEvent, 20000, true);//66분에 한번씩
             }
             LoadBackgroundWorker();
-           // LoadAdress();
+            // LoadAdress();
             System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu();
 
             System.Windows.Forms.MenuItem itemConfig = new System.Windows.Forms.MenuItem();
@@ -535,17 +480,12 @@ namespace TLMSMESGETDATA
             m_notify.DoubleClick += (object send, EventArgs args) => { this.Show(); this.WindowState = WindowState.Normal; this.ShowInTaskbar = true; };
             m_notify.ContextMenu = menu;
             Version ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            m_notify.Text = string.Format("PLC To GMES: v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Build);
-            
-            string str = string.Format("PLC To GMES: v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Build);
+            m_notify.Text = string.Format("PQC PLC To GMES: v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Build);
+
+            string str = string.Format("PQC PLC To GMES: v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Build);
             notiftyBalloonTip(str, 1000);
-         //   StartFunction(); //Start function when program loaded
-//            LoadDataMQCStarting(); 
-//  StartTimerGetPLCData();
-
-
-
-
+            StartFunction(); //Start function when program loaded
+            StartUpWindow.RegistrationStartUp();
         }
 
         private void ItemExit_Click(object sender, EventArgs e)
@@ -642,7 +582,6 @@ namespace TLMSMESGETDATA
         {
             tmrCallBgWorker.Tick -= new EventHandler(tmrCallBgWorker_Tick);
             bgWorker.DoWork -= new DoWorkEventHandler(bg_DoWork);
-            bgWorker.ProgressChanged -= BgWorker_ProgressChanged;
             bgWorker.RunWorkerCompleted -= new RunWorkerCompletedEventHandler(bg_RunWorkerCompleted);
 
             if (m_timerEvent != null)
@@ -653,12 +592,11 @@ namespace TLMSMESGETDATA
 
 
         }
-       private void StartFunction()
+        private void StartFunction()
         {
 
             try
             {
-
                 btn_connect.Content = "Starting";
                 btn_disconnect.Content = "Stop";
                 btn_connect.IsEnabled = false;
@@ -675,8 +613,6 @@ namespace TLMSMESGETDATA
                 LoadDataMQCStarting();
                 tmrCallBgWorker.Interval = SettingClass.timmer > 0 ? SettingClass.timmer : 500;
                 tmrCallBgWorker.Start();
-
-
             }
             catch (Exception exc)
             {
@@ -689,14 +625,14 @@ namespace TLMSMESGETDATA
         {
             try
             {
-               
+
                 btn_connect.Content = "Starting";
                 btn_disconnect.Content = "Stop";
                 btn_connect.IsEnabled = false;
                 btn_disconnect.IsEnabled = true;
-              
-                if(System.IO.File.Exists(SaveObject.Pathsave))
-                SettingClass = (SettingClass)SaveObject.Load_data(SaveObject.Pathsave);
+
+                if (System.IO.File.Exists(SaveObject.Pathsave))
+                    SettingClass = (SettingClass)SaveObject.Load_data(SaveObject.Pathsave);
                 if (SettingClass == null)
                     SettingClass = new SettingClass();
                 if (SettingClass.PLCTimeOut == 0)
@@ -736,7 +672,7 @@ namespace TLMSMESGETDATA
         }
         public void LoadDataMQCStarting()
         {
-            
+
             try
             {
                 stopwatch.Start();
@@ -785,15 +721,15 @@ namespace TLMSMESGETDATA
 
                                     }
 
-                                   qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(mQCVariable.QRMES);
-                                  //  get values from db and write value PLC
+                                    qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(mQCVariable.QRMES);
+                                    //  get values from db and write value PLC
                                     SQLUpload.SQLQRUpdate sQLQR = new SQLQRUpdate();
                                     DataTable dtQRRecord = sQLQR.GetQuanityFromQRMES(mQCVariable.QRMES);
 
                                     if (dtQRRecord.Rows.Count == 1)
                                     {
                                         var OutputQty = Int16.Parse(dtQRRecord.Rows[0]["OutputQty"].ToString());
-                                        var NGQty =Int16.Parse(dtQRRecord.Rows[0]["NGQty"].ToString());
+                                        var NGQty = Int16.Parse(dtQRRecord.Rows[0]["NGQty"].ToString());
                                         var RWQty = Int16.Parse(dtQRRecord.Rows[0]["RWQty"].ToString());
                                         var Total = Int16.Parse(dtQRRecord.Rows[0]["TotalQty"].ToString());
                                         if (qRMQC_MES.quantity > (OutputQty + NGQty + RWQty) && qRMQC_MES.quantity > Total)
@@ -824,11 +760,11 @@ namespace TLMSMESGETDATA
                                 }
                             }
                         }
-                               
-                            DicMQCVariableIP.Add(machine.IP, mQCVariable);
-                            pLC.Diconnect();
+
+                        DicMQCVariableIP.Add(machine.IP, mQCVariable);
+                        pLC.Diconnect();
                         qRMQC_MES = new QRMQC_MES();
-                         qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(mQCVariable.QRMES);
+                        qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(mQCVariable.QRMES);
                         qRIDMES = QRSpilittoClass.QRstring2IDFormat(mQCVariable.QRID);
                         MachineOperation operation = new MachineOperation();
                         operation.IP = machine.IP;
@@ -855,8 +791,8 @@ namespace TLMSMESGETDATA
 
                     }
                     datagridMachines.ItemsSource = machineOperations;
-                    }
-                
+                }
+
             }
             catch (Exception ex)
             {
@@ -876,19 +812,19 @@ namespace TLMSMESGETDATA
                 if (ConnectionPLC == 0)
                 {
                     qCVariable.DicSPLCtatus = pLC.ReadStatusPLCMQC();
-                  
+
                     if (qCVariable.DicSPLCtatus[VariablePLC.FlagKT] == true)
                     {
-                        if(qCVariable.DicSPLCtatus[VariablePLC.WriteReadyStart]== false)
-                        { 
+                        if (qCVariable.DicSPLCtatus[VariablePLC.WriteReadyStart] == false)
+                        {
                             string QRMES = pLC.ReadAreaByteToString(183, 0, 300);
-                        qCVariable.QRMES = QRMES.Trim();
+                            qCVariable.QRMES = QRMES.Trim();
 
                             string QRID = pLC.ReadAreaByteToString(182, 0, 300);
-                        qCVariable.QRID = QRID.Trim();
+                            qCVariable.QRID = QRID.Trim();
 
-                        var ResultValidationQRCode = SubFunction.IsValidationQRCode(qCVariable.QRMES, qCVariable.QRID);
-                         pLC.WriteDinttoPLC(ResultValidationQRCode, 181, 206, 2);//write message error to PLC
+                            var ResultValidationQRCode = SubFunction.IsValidationQRCode(qCVariable.QRMES, qCVariable.QRID);
+                            pLC.WriteDinttoPLC(ResultValidationQRCode, 181, 206, 2);//write message error to PLC
                             if (ResultValidationQRCode == 0)
                             {
                                 SQLUpload.SQLQRUpdate sQLQR = new SQLQRUpdate();
@@ -905,7 +841,7 @@ namespace TLMSMESGETDATA
                                     {
                                         pLC.WriteMQCProducedQuantitytoPLC(OutputQty, NGQty, RWQty);
                                         pLC.WritebittoPLC(true, 181, 204, 1);//Write FlagKT to PLC
-                                       //23/05/2021 : Add to write QR to PLC
+                                                                             //23/05/2021 : Add to write QR to PLC
                                         pLC.WriteQRMESto(184, 0, 300, QRMES);
                                         ///
                                     }
@@ -933,25 +869,25 @@ namespace TLMSMESGETDATA
                             }
 
                             //get values from db and write value PLC
-                         
+
 
 
                             qCVariable.ListMQCQty = pLC.ReadQuantityMQC();
-                           
+
                             qCVariable.ListQtyProduced = pLC.ReadQuantityMQCProduced();
-                            
-                            qCVariable.ListNG38 = pLC.ReadAreaIntToListInt(3, 4, 76);                       
+
+                            qCVariable.ListNG38 = pLC.ReadAreaIntToListInt(3, 4, 76);
                             qCVariable.ListRW38 = pLC.ReadAreaIntToListInt(4, 4, 76);
 
 
                         }
                         else
                         {
-                            
-                            qCVariable.QRMES = mQCOld.QRMES;                         
+
+                            qCVariable.QRMES = mQCOld.QRMES;
                             qCVariable.QRID = mQCOld.QRID;
                             qCVariable.ListMQCQty = pLC.ReadQuantityMQC();
-                            if(qCVariable.ListMQCQty[1] > mQCOld.ListMQCQty[1])
+                            if (qCVariable.ListMQCQty[1] > mQCOld.ListMQCQty[1])
                             {
                                 qCVariable.ListNG38 = pLC.ReadAreaIntToListInt(3, 4, 76);
 
@@ -973,7 +909,7 @@ namespace TLMSMESGETDATA
                         }
                     }
 
-                   
+
 
 
                     pLC.Diconnect();
@@ -989,140 +925,25 @@ namespace TLMSMESGETDATA
 
         private void btn_test_Click_1(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "Start read data from PLC", "START");
-                stopwatch = new Stopwatch();
-                MachineItem machine = new MachineItem();
-                machine.IP = "172.16.100.5";
-                machine.Line = "L01";
-                int ConnectionPLC = -1;
+        //    string test = "s;B51122020018;BMH1257094S06;5V4KAIIQW9C1;108;20/04/2022;;BMH1257094S062022420;;JO20220420122858757;3VTIVH13XCW1;;*e";
+        //    QRMQC_MES qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(test);
 
-                Sharp.ReadVariablePLC pLC = new Sharp.ReadVariablePLC(machine.IP, 0, 0, out ConnectionPLC);
-                MQCVariable mQCVariable = new MQCVariable();
-                mQCVariable.DicSPLCtatus = pLC.ReadStatusPLCMQC();
-
-
-                mQCVariable.QRMES = pLC.ReadAreaByteToString(183, 0, 300);
-                mQCVariable.QRID = pLC.ReadAreaByteToString(182, 0, 300);
-                mQCVariable.ListMQCQty = pLC.ReadQuantityMQC();
-                mQCVariable.ListNG38 = pLC.ReadAreaIntToListInt(3, 4, 76);
-                mQCVariable.ListRW38 = pLC.ReadAreaIntToListInt(4, 4, 76);
-                mQCVariable.ListQtyProduced = pLC.ReadQuantityMQCProduced();
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "ConnectionPLC", ConnectionPLC.ToString());
-                SystemLog.Output(SystemLog.MSG_TYPE.War, VariablePLC.FlagKT, mQCVariable.DicSPLCtatus[VariablePLC.FlagKT].ToString());
-                SystemLog.Output(SystemLog.MSG_TYPE.War, VariablePLC.IsReset, mQCVariable.DicSPLCtatus[VariablePLC.IsReset].ToString());
-                SystemLog.Output(SystemLog.MSG_TYPE.War, VariablePLC.OnOFF, mQCVariable.DicSPLCtatus[VariablePLC.OnOFF].ToString());
-                SystemLog.Output(SystemLog.MSG_TYPE.War, VariablePLC.WriteReadyStart, mQCVariable.DicSPLCtatus[VariablePLC.WriteReadyStart].ToString());
-
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "QR MES", mQCVariable.QRMES);
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "QR ID", mQCVariable.QRID);
-
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "Output", mQCVariable.ListMQCQty[0].ToString());
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "NG", mQCVariable.ListMQCQty[1].ToString());
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "RW", mQCVariable.ListMQCQty[2].ToString());
-
-                for (int i = 0; i < mQCVariable.ListNG38.Count; i++)
-                {
-                    SystemLog.Output(SystemLog.MSG_TYPE.War, "NG" + (i + 1).ToString(), mQCVariable.ListNG38[i].ToString());
-                }
-                for (int i = 0; i < mQCVariable.ListRW38.Count; i++)
-                {
-                    SystemLog.Output(SystemLog.MSG_TYPE.War, "RW" + (i + 1).ToString(), mQCVariable.ListRW38[i].ToString());
-                }
-
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "Output Produced", mQCVariable.ListQtyProduced[0].ToString());
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "NG Produced", mQCVariable.ListQtyProduced[1].ToString());
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "RW Produced", mQCVariable.ListQtyProduced[2].ToString());
-
-
-
-                SystemLog.Output(SystemLog.MSG_TYPE.War, "Start read data from PLC", "END");
-
-                try
-                {
-                    SystemLog.Output(SystemLog.MSG_TYPE.Nor, "Start write MES code", mQCVariable.QRMES);
-                    pLC.WriteQRMESto(184, 0, 300, mQCVariable.QRMES);
-                    SystemLog.Output(SystemLog.MSG_TYPE.Nor, "End write MES code", mQCVariable.QRMES);
-                }
-                catch (Exception ex)
-                {
-
-                    SystemLog.Output(SystemLog.MSG_TYPE.Err, "Write fail", ex.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-
-                SystemLog.Output(SystemLog.MSG_TYPE.Err, ex.Source, ex.Message);
-            }
-        }
-
-
-
-
-        //private void btn_GetValue_Click(object sender, RoutedEventArgs e)
-        //{
-        //    try
+        //    UploadLocalPLCDB uploadLocalPLCDB = new UploadLocalPLCDB();
+        //    MQCVariable mQCVariable = new MQCVariable()
         //    {
-        //        SystemLog.Output(SystemLog.MSG_TYPE.War, "Start read data from PLC", "START");
-        //        stopwatch = new Stopwatch();
-        //        MachineItem machine = new MachineItem();
-        //        machine.IP = "172.16.1.145";
-        //        machine.Line = "L03";
-        //        int ConnectionPLC = -1;
-        //        Sharp.ReadVariablePLC pLC = new Sharp.ReadVariablePLC(machine.IP, 0, 0, out ConnectionPLC);
-        //        MQCVariable mQCVariable = new MQCVariable();
-        //        mQCVariable.DicSPLCtatus = pLC.ReadStatusPLCMQC();
+        //        QRMES = "s;B51221110264;BFFCHR4383P;5KYV41ZQVS01;261;07/01/2022;;BFFCHR4383P202217;;JO20220107202508647;3VTIVH13XCW1e",
+        //        QRID = "﻿44Z9D3ED5281;TL-9084;Nguyễn Trung Hiếu;",
+        //        ListMQCQty = new List<int>()
+        //        {
+        //            1000
+        //        },
 
-            //        mQCVariable.QRMES = pLC.ReadAreaByteToString(183, 0, 300);
-            //        mQCVariable.QRID = pLC.ReadAreaByteToString(182, 0, 300);
-            //        mQCVariable.ListMQCQty = pLC.ReadQuantityMQC();
-            //        mQCVariable.ListNG38 = pLC.ReadAreaIntToListInt(3, 4, 76);
-            //        mQCVariable.ListRW38 = pLC.ReadAreaIntToListInt(4, 4, 76);
-            //        mQCVariable.ListQtyProduced = pLC.ReadQuantityMQCProduced();
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "ConnectionPLC", ConnectionPLC.ToString());
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, VariablePLC.FlagKT, mQCVariable.DicSPLCtatus[VariablePLC.FlagKT].ToString());
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, VariablePLC.IsReset, mQCVariable.DicSPLCtatus[VariablePLC.IsReset].ToString());
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, VariablePLC.OnOFF, mQCVariable.DicSPLCtatus[VariablePLC.OnOFF].ToString());
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, VariablePLC.WriteReadyStart, mQCVariable.DicSPLCtatus[VariablePLC.WriteReadyStart].ToString());
-
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "QR MES", mQCVariable.QRMES);
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "QR ID", mQCVariable.QRID);
-
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "Output", mQCVariable.ListMQCQty[0].ToString());
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "NG", mQCVariable.ListMQCQty[1].ToString());
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "RW", mQCVariable.ListMQCQty[2].ToString());
-
-            //        for (int i = 0; i < mQCVariable.ListNG38.Count; i++)
-            //        {
-            //            SystemLog.Output(SystemLog.MSG_TYPE.War, "NG"+(i+1).ToString(), mQCVariable.ListNG38[i].ToString());
-            //        }
-            //        for (int i = 0; i < mQCVariable.ListRW38.Count; i++)
-            //        {
-            //            SystemLog.Output(SystemLog.MSG_TYPE.War, "RW" + (i + 1).ToString(), mQCVariable.ListRW38[i].ToString());
-            //        }
-
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "Output Produced", mQCVariable.ListQtyProduced[0].ToString());
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "NG Produced", mQCVariable.ListQtyProduced [1].ToString());
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "RW Produced", mQCVariable.ListQtyProduced[2].ToString());
-
-
-
-            //        SystemLog.Output(SystemLog.MSG_TYPE.War, "Start read data from PLC", "END");
-            //    }
-            //    catch (Exception ex)
-            //    {
-
-            //        SystemLog.Output(SystemLog.MSG_TYPE.Err, ex.Source, ex.Message);
-            //    }
-
-
-
-
-
-
+        //    };
+        //    uploadLocalPLCDB.InsertMQCMESUpdateRealtime(mQCVariable, "OPQTY", "L03", null);
+        //    //try
+          
         }
+    }
 }
 
 

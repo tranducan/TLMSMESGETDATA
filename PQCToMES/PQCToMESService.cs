@@ -11,6 +11,7 @@ using System.Timers;
 using EFTechlinkMesDb.Interface;
 using EFTechlinkMesDb.Implementation;
 using EFTechlinkMesDb.Model;
+using PQCToMES.MySql;
 
 namespace PQCToMES
 {
@@ -49,10 +50,15 @@ namespace PQCToMES
             {
                 try
                 {
-                    var transferResult = DataContext.UpdateFlagTransferingSuccessful(item.PQCMesDataId);
-                    if (transferResult)
+                    Upload2MESMySql upload2MES = new Upload2MESMySql();
+                    var result = upload2MES.PushPQCDataToMESSql(item);
+                    if (result)
                     {
-                        eventLog1.WriteEntry("Transfering to MES database successful: " + item.POCode, EventLogEntryType.Information);
+                        var transferResult = DataContext.UpdateFlagTransferingSuccessful(item.PQCMesDataId);
+                        if (transferResult)
+                        {
+                            eventLog1.WriteEntry("Transfering to MES database successful: " + item.POCode, EventLogEntryType.Information);
+                        }
                     }
                 }
                 catch (Exception ex)

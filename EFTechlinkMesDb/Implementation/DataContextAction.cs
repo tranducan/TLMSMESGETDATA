@@ -52,9 +52,9 @@ namespace EFTechlinkMesDb.Implementation
             using (var context = new EFTechLinkMESModel())
             {
                 pQCMesDatas = context.PQCMesDatas
-                    .Take<PQCMesData>(100)
                     .Where(d => d.Flag == flag || d.Flag == null)
                     .OrderBy(o => o.InspectDateTime)
+                    .Take(10)
                     .ToList();
             }
 

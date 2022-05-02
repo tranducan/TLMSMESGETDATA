@@ -104,6 +104,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MySql\DbConnection.cs" />
+    <Compile Include="MySql\DbUtilsMySql.cs" />
+    <Compile Include="MySql\MySqlExecution.cs" />
+    <Compile Include="MySql\Upload2MESMySql.cs" />
     <Compile Include="PQCToMESService.cs">
       <SubType>Component</SubType>
     </Compile>

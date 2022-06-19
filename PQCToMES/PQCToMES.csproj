@@ -108,6 +108,7 @@
     <Compile Include="MySql\DbUtilsMySql.cs" />
     <Compile Include="MySql\MySqlExecution.cs" />
     <Compile Include="MySql\Upload2MESMySql.cs" />
+    <Compile Include="MySql\UploadMESRealtime.cs" />
     <Compile Include="PQCToMESService.cs">
       <SubType>Component</SubType>
     </Compile>

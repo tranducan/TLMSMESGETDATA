@@ -20,5 +20,11 @@ namespace PQCToMES.MySql
 
             return DbConnection.GetDBConnection(datasource, port, database, username, password);
         }
+
+        public static MySqlConnection GetDBConnection(string connectionString)
+        {
+
+            return DbConnection.GetDBConnection(connectionString);
+        }
     }
 }

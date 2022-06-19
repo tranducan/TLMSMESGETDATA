@@ -11,7 +11,7 @@ namespace EFTechlinkMesDb.Interface
         PQCMesData Select(string Model);
         bool Insert(PQCMesData pQCMesData);
 
-        List<PQCMesData> SelectTop100NotProcess(string flag);
+        List<PQCMesData> SelectTopNotProcess(string flag, int topQuery);
 
         bool UpdateFlagTransferingSuccessful(long ID);
 

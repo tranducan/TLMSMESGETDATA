@@ -4,55 +4,58 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EFTechlinkMesDb;
-using EFTechlinkMesDb.Model;
 
 namespace PQCToMES.MySql
 {
-    public class Upload2MESMySql
+    public class UploadMESRealtime
     {
         public static string connectionString = "";
-        public Upload2MESMySql(string _connectionString)
+
+        public UploadMESRealtime(string _connectionString)
         {
             connectionString = _connectionString;
         }
-        public bool PushPQCDataToMESSql(PQCMesData pQCMesData)
+        
+        public bool PushPQCDataToMESRealtime(PQCMesData pQCMesData)
         {
             try
             {
                 StringBuilder command = new StringBuilder();
-                command.Append(@"INSERT INTO processhistory_pqcmesdata(
+                command.Append(@"INSERT INTO t_mqc_realtime(
 
-    POCode,
-    LotNumber,
-    Model,
-    Site,
-    Line,
-    PROCESS,
-    ATTRIBUTE,
-    AttributeType,
-    Quantity,
-    Flag,
-    inspector,
-    InspectDateTime,
-    LastTimeModified
+    serno,
+    lot,
+    model,
+    site,
+    factory,
+    line,
+    process,
+    item,
+    inspectdate,
+    inspecttime,
+    data,
+    judge,
+    status,
+    remark,
+    inspector
     )
     VALUES( ");
-
                 command.Append("'" + pQCMesData.POCode + "',");
                 command.Append("'" + pQCMesData.LotNumber + "',");
                 command.Append("'" + pQCMesData.Model + "',");
                 command.Append("'" + pQCMesData.Site + "',");
+                command.Append("'" + "TechLink" + "',");
                 command.Append("'" + pQCMesData.Line + "',");
                 command.Append("'" + pQCMesData.Process + "',");
                 command.Append("'" + pQCMesData.Attribute + "',");
-                command.Append("'" + pQCMesData.AttributeType + "',");
+                command.Append("'" + pQCMesData.InspectDateTime.ToString("yyyy-MM-dd") + "',");
+                command.Append("'" + pQCMesData.InspectDateTime.ToString("HH:mm:ss") + "',");
                 command.Append("'" + pQCMesData.Quantity + "',");
+                command.Append("'" + "1" + "',");
                 command.Append("'" + pQCMesData.Flag + "',");
-                command.Append("'" + pQCMesData.Inspector + "',");
-                command.Append("'" + pQCMesData.InspectDateTime.ToString("yyyy-MM-dd HH:mm:ss") + "',");
-                command.Append("'" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "'");
+                command.Append("'" + "" + "',");
+                command.Append("'" + pQCMesData.Inspector + "'");
                 command.Append(" ) ");
-
                 MySqlExecution mySqlExecution = new MySqlExecution(connectionString);
                 var result = mySqlExecution.sqlExecuteNonQuery(command.ToString(), false);
                 return result;

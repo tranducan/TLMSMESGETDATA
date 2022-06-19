@@ -16,5 +16,12 @@ namespace PQCToMES.MySql
             MySqlConnection conn = new MySqlConnection(connString);
             return conn;
         }
+
+        public static MySqlConnection
+               GetDBConnection(string connectionString)
+        {
+            MySqlConnection conn = new MySqlConnection(connectionString);
+            return conn;
+        }
     }
 }

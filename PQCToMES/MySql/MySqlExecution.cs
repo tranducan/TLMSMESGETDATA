@@ -11,8 +11,14 @@ namespace PQCToMES.MySql
 {
     public class MySqlExecution
     {
-        public MySqlConnection conn = DbUtilsMySql.GetDBConnection();
+        static string connectionString;
+        public MySqlExecution(string _connectionString)
+        {
+            connectionString = _connectionString;
+        }
 
+        public MySqlConnection conn = DbUtilsMySql.GetDBConnection(connectionString);
+       
         public string sqlExecuteScalarString(string sql)
         {
 

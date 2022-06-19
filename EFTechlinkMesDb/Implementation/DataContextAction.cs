@@ -46,7 +46,7 @@ namespace EFTechlinkMesDb.Implementation
             throw new NotImplementedException();
         }
 
-        public List<PQCMesData> SelectTop100NotProcess(string flag)
+        public List<PQCMesData> SelectTopNotProcess(string flag, int topQuery)
         {
             List<PQCMesData> pQCMesDatas = new List<PQCMesData>();
             using (var context = new EFTechLinkMESModel())
@@ -54,7 +54,7 @@ namespace EFTechlinkMesDb.Implementation
                 pQCMesDatas = context.PQCMesDatas
                     .Where(d => d.Flag == flag || d.Flag == null)
                     .OrderBy(o => o.InspectDateTime)
-                    .Take(10)
+                    .Take(topQuery)
                     .ToList();
             }
 
@@ -73,7 +73,7 @@ namespace EFTechlinkMesDb.Implementation
                 {
                     if (dataUpdated != null)
                     {
-                        dataUpdated.Flag = "Successful";
+                        dataUpdated.Flag = "Success";
                         context.PQCMesDatas.Attach(dataUpdated);
                         context.Entry(dataUpdated).State = EntityState.Modified;
                         context.SaveChanges();

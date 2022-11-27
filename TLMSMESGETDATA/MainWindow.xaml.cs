@@ -191,11 +191,7 @@ namespace TLMSMESGETDATA
                                     }
                                     return;
                                 }
-                                else if (listChanged.Contains("QRCheck"))
-                                {
-                                    QRMQC_MES QRMES = QRSpilittoClass.QRstring2MQCFormat(mQCPLC.QRMES);
-                                    SubFunction.InsertTargettoSOTDb(mQCPLC.QRMES, QRMES.Product, QRMES.quantity, 0);
-                                }
+
                                 UploadPLCtoDatabase(mQCChanged, listChanged, machine.Line);
 
                                 QRMQC_MES qRMQC_MES = QRSpilittoClass.QRstring2MQCFormat(mQCPLC.QRMES);

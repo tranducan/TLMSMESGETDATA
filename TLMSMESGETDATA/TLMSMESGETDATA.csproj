@@ -250,7 +250,6 @@
     <Compile Include="SQLUpload\MysqlMES.cs" />
     <Compile Include="SQLUpload\sqlCON.cs" />
     <Compile Include="SQLUpload\sqlERPCON.cs" />
-    <Compile Include="SQLUpload\SQLERPTarget.cs" />
     <Compile Include="SQLUpload\SQLQRUpdate.cs" />
     <Compile Include="SQLUpload\sqlSFT.cs" />
     <Compile Include="SQLUpload\Upload2Mes.cs" />

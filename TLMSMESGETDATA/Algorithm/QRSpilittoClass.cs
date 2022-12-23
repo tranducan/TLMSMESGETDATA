@@ -21,8 +21,7 @@ namespace TLMSMESGETDATA.Algorithm
                 if(QRstr.Substring(0,1)=="s" && QRstr.Substring((QRstr.Length-1),1)== "e")
                 {
                     var QRArray = QRstr.Substring(1, QRstr.Length - 2).Split(';');
-                    if(QRArray.Count() == 10)
-                    {
+
                         qRMQC_MES.PO = QRArray[1];
                         qRMQC_MES.Product = QRArray[2];
                         qRMQC_MES.lot = QRArray[3];
@@ -34,8 +33,6 @@ namespace TLMSMESGETDATA.Algorithm
                         qRMQC_MES.str2 = QRArray[7];
                         qRMQC_MES.str3 = QRArray[8];
                         qRMQC_MES.str4 = QRArray[9];
-                      
-                    }
 
                 }
                

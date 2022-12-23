@@ -12,21 +12,20 @@ namespace TLMSMESGETDATA
 
         public static SqlConnection GetDBConnection(Model.SettingClass settingClass)
         {
-            //string datasource = @"FS-35686\SQLEXPRESS";
+            //string datasource = @"DESKTOP-M6N0IBR\SQLEXPRESS";
             //string database = "ERPSOFT";
-            //string username = "tldev";
-            //string password = "toluen@2007";
+            //string username = "ERPUSER";
+            //string password = "12345";
+
             string datasource = "";
             string database = "";
             string username = "";
             string password = "";
+            datasource = settingClass.OfflineServer == null ? "172.16.0.12" : settingClass.OfflineServer;
+            database = "ERPSOFT";
+            username = settingClass.userOffline == null ? "ERPUSER" : settingClass.userOffline;
+            password = settingClass.password == null ? "12345" : settingClass.password;
 
-
-                 datasource = settingClass.OfflineServer == null? "172.16.0.12": settingClass.OfflineServer;
-                database = "ERPSOFT";
-                username = settingClass.userOffline==null? "ERPUSER" : settingClass.userOffline;
-                password = settingClass.password==null ?"12345": settingClass.password;
-           
             //string datasource = @"172.16.1.222\LOCALSQL";
             //string database = "MQCMES";
             //string username = "Automation";
@@ -63,28 +62,7 @@ namespace TLMSMESGETDATA
 
             return DBSQLServerUtils.GetSFTDBConnection(datasource, database, username, password);
         }
-        //public static SqlConnection GetERPTargetBConnection()
-        //{
-        //    //Data Source = LONG; Initial Catalog = TEST; Integrated Security = True
-        //    string datasource = "172.16.0.11";
-        //    string database = "SOT";
-        //    string username = "sa";
-        //    string password = "dsc@123";
-
-
-        //    return DBSQLServerUtils.GetSFTDBConnection(datasource, database, username, password);
-        //}
-        public static SqlConnection GetERPTargetBConnection()
-        {
-            //Data Source = LONG; Initial Catalog = TEST; Integrated Security = True
-            string datasource = "172.16.0.11";
-            string database = "SOT";
-            string username = "soft";
-            string password = "techlink@!@#";
-
-
-            return DBSQLServerUtils.GetSFTDBConnection(datasource, database, username, password);
-        }
+      
         public static SqlConnection GetLocalPLCConnection(string _datasource, string  _database, string _user, string _pass)
         {
             //Data Source = LONG; Initial Catalog = TEST; Integrated Security = True

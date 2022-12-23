@@ -27,10 +27,8 @@ namespace TLMSMESGETDATA
                     if (QRMES.EndsWith("e"))
                     {
                         var QRArray = QRMES.Substring(1, QRMES.Length - 2).Split(';');
-                        if (QRArray.Count() == 10)
-                        {
+
                             IsQRMES = true;
-                        }
                     }
                     else
                     {
@@ -70,58 +68,6 @@ namespace TLMSMESGETDATA
             }
 
             return 3;
-        }
-        public static void InsertTargettoSOTDb(string QRMES, string Product, int Output, int Scrap)
-        {
-            try
-            {
-
-                SQLUpload.SQLQRUpdate sQLQR = new SQLQRUpdate();
-                DataTable dtQRRecord = sQLQR.GetQuanityFromQRMES(QRMES);
-                if (dtQRRecord.Rows.Count == 0)
-                {
-                    SQLERPTarget sQLERPTarget = new SQLERPTarget();
-                    StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.Append(@" USE [SOT]
-
-DECLARE @DATE varchar(8) =  _DATE
-DECLARE @PRODCODE nchar(100) =  _PRODCODE
-DECLARE @OUTPUT numeric(18,0) = _OUTPUT
-DECLARE @SCRAP numeric(18,0) =  _SCRAP
-
-IF (NOT EXISTS(SELECT TOP 1 1 FROM dbo.DAILYTARGET WHERE DATE = @DATE AND PRODCODE = @PRODCODE))
-BEGIN
-INSERT INTO [dbo].[DAILYTARGET]
-           ([DATE]
-           ,[PRODCODE]
-           ,[OUTPUT]
-           ,[SCRAP])
-     VALUES
-           (@DATE
-           ,@PRODCODE
-           ,@OUTPUT
-           ,@SCRAP)
-
- END
- ELSE
- UPDATE [dbo].[DAILYTARGET] SET OUTPUT = OUTPUT + @OUTPUT, SCRAP = SCRAP+ @SCRAP
- WHERE DATE = @DATE AND PRODCODE = @PRODCODE
-");
-                    stringBuilder.Replace("_DATE", "'" + DateTime.Now.ToString("yyyyMMdd") + "'");
-                    stringBuilder.Replace("_PRODCODE", "'" + Product + "'");
-                    stringBuilder.Replace("_OUTPUT", Output.ToString());
-                    stringBuilder.Replace("_SCRAP", Scrap.ToString());
-
-                    sQLERPTarget.sqlExecuteNonQuery(stringBuilder.ToString(), false);
-                }
-            }
-
-            catch (Exception ex)
-            {
-
-                SystemLog.Output(SystemLog.MSG_TYPE.Err, "InsertTargettoSOTDb(string QRMES, string Product, int Output, int Scrap)", ex.Message);
-            }
-
         }
     }
 

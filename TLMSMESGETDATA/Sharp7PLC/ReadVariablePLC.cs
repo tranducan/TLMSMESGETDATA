@@ -27,6 +27,9 @@ namespace TLMSMESGETDATA.Sharp
             _IP = IP;
             _Rack = Rack;
             _Rack = Slot;
+            Client.ConnTimeout = 500;
+            Client.RecvTimeout = 500;
+            Client.SendTimeout = 500;
            Result = Client.ConnectTo(_IP, _Rack, _Slot);
             if(Result == 0)
             {
